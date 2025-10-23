@@ -168,13 +168,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Hadolint (Dockerfile linter)
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: ./Dockerfile.backend
           failure-threshold: warning
 
       - name: Run Hadolint for frontend
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: ./Dockerfile.frontend
           failure-threshold: warning
