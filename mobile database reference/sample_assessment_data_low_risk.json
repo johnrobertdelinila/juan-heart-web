@@ -1,0 +1,296 @@
+{
+  "assessment_id": "ASSESS_2024_003",
+  "user_id": "USER_11111",
+  "session_id": "SESS_20241018_160030",
+  "timestamp": "2024-10-18T16:00:30Z",
+  "version": "1.0.0",
+  
+  "user_profile": {
+    "age": 28,
+    "sex": "Female",
+    "date_of_birth": "1996-05-12",
+    "location": {
+      "country": "Philippines",
+      "region": "Metro Manila",
+      "city": "Taguig City",
+      "coordinates": {
+        "latitude": 14.5176,
+        "longitude": 121.0509
+      }
+    },
+    "language_preference": "en",
+    "assessment_date": "2024-10-18T16:00:30Z"
+  },
+
+  "symptoms": {
+    "chest_pain": {
+      "present": false,
+      "type": "none",
+      "duration_minutes": 0,
+      "radiation": false,
+      "exertional": false,
+      "severity_scale": 0,
+      "description": "No chest pain reported"
+    },
+    "shortness_of_breath": {
+      "present": false,
+      "level": "none",
+      "at_rest": false,
+      "with_exertion": false,
+      "description": "No breathing difficulties"
+    },
+    "palpitations": {
+      "present": false,
+      "type": "none",
+      "duration_hours": 0,
+      "heart_rate": 72,
+      "description": "No palpitations reported"
+    },
+    "syncope": {
+      "present": false,
+      "episodes": 0,
+      "last_episode": null
+    },
+    "fainting": {
+      "present": false,
+      "episodes": 0
+    },
+    "neurological_symptoms": {
+      "present": false,
+      "dizziness": false,
+      "confusion": false,
+      "weakness": false
+    },
+    "other_symptoms": {
+      "leg_swelling": false,
+      "sweating": false,
+      "nausea": false,
+      "fatigue": false
+    }
+  },
+
+  "vital_signs": {
+    "blood_pressure": {
+      "systolic": 118,
+      "diastolic": 76,
+      "unit": "mmHg",
+      "measurement_time": "2024-10-18T15:55:00Z",
+      "device": "digital_monitor"
+    },
+    "heart_rate": {
+      "resting": 72,
+      "unit": "bpm",
+      "rhythm": "regular",
+      "measurement_time": "2024-10-18T15:55:00Z"
+    },
+    "oxygen_saturation": {
+      "value": 98,
+      "unit": "%",
+      "measurement_time": "2024-10-18T15:55:00Z",
+      "device": "pulse_oximeter"
+    },
+    "temperature": {
+      "value": 36.8,
+      "unit": "celsius",
+      "measurement_time": "2024-10-18T15:55:00Z"
+    },
+    "weight": {
+      "value": 58.5,
+      "unit": "kg",
+      "measurement_date": "2024-10-15T09:00:00Z"
+    },
+    "height": {
+      "value": 165,
+      "unit": "cm"
+    },
+    "bmi": {
+      "value": 21.5,
+      "category": "normal"
+    }
+  },
+
+  "medical_history": {
+    "cardiovascular": {
+      "previous_heart_disease": false,
+      "heart_attack": false,
+      "stroke": false,
+      "heart_surgery": false,
+      "angina": false,
+      "arrhythmia": false
+    },
+    "chronic_conditions": {
+      "hypertension": false,
+      "diabetes": false,
+      "high_cholesterol": false,
+      "chronic_kidney_disease": false,
+      "obesity": false
+    },
+    "family_history": {
+      "heart_disease": false,
+      "stroke": false,
+      "diabetes": false,
+      "hypertension": false,
+      "age_of_onset": {}
+    },
+    "medications": {
+      "current_medications": [],
+      "allergies": []
+    }
+  },
+
+  "lifestyle_factors": {
+    "smoking": {
+      "current_smoker": false,
+      "former_smoker": false,
+      "quit_date": null,
+      "pack_years": 0,
+      "smoking_cessation_aids": []
+    },
+    "alcohol": {
+      "consumes_alcohol": true,
+      "frequency": "occasionally",
+      "units_per_week": 2,
+      "binge_drinking": false
+    },
+    "exercise": {
+      "regular_exercise": true,
+      "frequency_per_week": 5,
+      "duration_minutes": 60,
+      "intensity": "moderate",
+      "activities": ["running", "yoga", "swimming", "cycling"]
+    },
+    "diet": {
+      "diet_type": "healthy",
+      "fruits_vegetables_daily": true,
+      "processed_foods": "low",
+      "sodium_intake": "low"
+    },
+    "stress": {
+      "stress_level": "low",
+      "work_stress": false,
+      "family_stress": false,
+      "coping_mechanisms": ["exercise", "meditation", "hobbies"]
+    },
+    "sleep": {
+      "average_hours": 8,
+      "sleep_quality": "excellent",
+      "sleep_apnea": false,
+      "insomnia": false
+    }
+  },
+
+  "risk_assessment_results": {
+    "likelihood_score": 1,
+    "likelihood_level": "Improbable",
+    "impact_score": 1,
+    "impact_level": "Negligible",
+    "final_risk_score": 1,
+    "risk_category": "Low",
+    "color_code": "🟢 Green",
+    "urgency": "none",
+    "timeframe": "no_action_required",
+    "confidence_level": 0.92
+  },
+
+  "recommendations": {
+    "immediate_action": "Self-care / monitor symptoms",
+    "recommended_facilities": [
+      "Barangay Health Center"
+    ],
+    "care_plan": {
+      "monitoring": [
+        "Continue regular health check-ups",
+        "Monitor for any new symptoms",
+        "Maintain current healthy lifestyle"
+      ],
+      "lifestyle_changes": [
+        "Continue current exercise routine",
+        "Maintain healthy diet",
+        "Continue stress management practices"
+      ],
+      "medical_follow_up": [
+        "Annual physical examination",
+        "Regular blood pressure monitoring",
+        "Continue preventive care"
+      ]
+    },
+    "emergency_instructions": {
+      "seek_immediate_care_if": [
+        "Chest pain develops",
+        "Shortness of breath occurs",
+        "Fainting or near-fainting",
+        "Severe dizziness or confusion"
+      ],
+      "emergency_contacts": [
+        {
+          "name": "Emergency Services",
+          "number": "911",
+          "type": "emergency"
+        },
+        {
+          "name": "Local Barangay Health Center",
+          "number": "+63-2-8888-1234",
+          "type": "primary_care"
+        }
+      ]
+    }
+  },
+
+  "assessment_metadata": {
+    "assessment_duration_minutes": 5,
+    "completion_rate": 100,
+    "validation_errors": [],
+    "data_quality_score": 0.99,
+    "device_info": {
+      "platform": "Android",
+      "version": "14",
+      "app_version": "1.0.0",
+      "screen_resolution": "1080x2400"
+    },
+    "location_accuracy": {
+      "gps_accuracy_meters": 4,
+      "location_source": "gps"
+    }
+  },
+
+  "follow_up": {
+    "next_assessment_recommended": "2025-10-18T16:00:00Z",
+    "reminder_settings": {
+      "daily_reminders": false,
+      "weekly_check_ins": false,
+      "medication_reminders": false
+    },
+    "care_team": {
+      "primary_care_physician": {
+        "name": "Dr. Lisa Garcia",
+        "clinic": "Taguig City Health Center",
+        "contact": "+63-2-8888-1234"
+      },
+      "cardiologist": null
+    }
+  },
+
+  "data_privacy": {
+    "consent_given": true,
+    "consent_date": "2024-10-18T16:00:30Z",
+    "data_sharing_preferences": {
+      "share_with_healthcare_providers": true,
+      "share_for_research": false,
+      "share_anonymized_data": true
+    },
+    "retention_period_years": 7,
+    "data_encryption": true,
+    "gdpr_compliant": true,
+    "hipaa_compliant": true
+  },
+
+  "technical_metadata": {
+    "api_version": "v1.0",
+    "assessment_algorithm_version": "2.1.0",
+    "model_confidence": 0.92,
+    "processing_time_ms": 850,
+    "server_timestamp": "2024-10-18T16:00:31Z",
+    "client_timestamp": "2024-10-18T16:00:30Z",
+    "timezone": "Asia/Manila"
+  }
+}

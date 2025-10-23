@@ -1,0 +1,94 @@
+# Dependabot configuration for automated dependency updates
+# Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Backend - Composer dependencies
+  - package-ecosystem: "composer"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Manila"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "johnrobertdelinila"
+    labels:
+      - "dependencies"
+      - "backend"
+      - "composer"
+    commit-message:
+      prefix: "chore(backend)"
+      include: "scope"
+    versioning-strategy: increase
+    ignore:
+      # Ignore major version updates for Laravel core
+      - dependency-name: "laravel/framework"
+        update-types: ["version-update:semver-major"]
+
+  # Frontend - npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Manila"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "johnrobertdelinila"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "npm"
+    commit-message:
+      prefix: "chore(frontend)"
+      include: "scope"
+    versioning-strategy: increase
+    ignore:
+      # Ignore major version updates for Next.js
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      # Ignore major version updates for React
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+
+  # Docker base images
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Manila"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "johnrobertdelinila"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Manila"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "johnrobertdelinila"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"

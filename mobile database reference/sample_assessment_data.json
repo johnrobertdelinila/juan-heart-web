@@ -1,0 +1,317 @@
+{
+  "assessment_id": "ASSESS_2024_001",
+  "user_id": "USER_12345",
+  "session_id": "SESS_20241018_143022",
+  "timestamp": "2024-10-18T14:30:22Z",
+  "version": "1.0.0",
+  
+  "user_profile": {
+    "age": 45,
+    "sex": "Male",
+    "date_of_birth": "1979-03-15",
+    "location": {
+      "country": "Philippines",
+      "region": "Metro Manila",
+      "city": "Quezon City",
+      "coordinates": {
+        "latitude": 14.6760,
+        "longitude": 121.0437
+      }
+    },
+    "language_preference": "en",
+    "assessment_date": "2024-10-18T14:30:22Z"
+  },
+
+  "symptoms": {
+    "chest_pain": {
+      "present": true,
+      "type": "pressure",
+      "duration_minutes": 15,
+      "radiation": true,
+      "exertional": true,
+      "severity_scale": 7,
+      "description": "Crushing chest pain that started during exercise"
+    },
+    "shortness_of_breath": {
+      "present": true,
+      "level": "moderate",
+      "at_rest": false,
+      "with_exertion": true,
+      "description": "Difficulty breathing during normal activities"
+    },
+    "palpitations": {
+      "present": true,
+      "type": "irregular",
+      "duration_hours": 2,
+      "heart_rate": 95,
+      "description": "Feeling of irregular heartbeat"
+    },
+    "syncope": {
+      "present": false,
+      "episodes": 0,
+      "last_episode": null
+    },
+    "fainting": {
+      "present": false,
+      "episodes": 0
+    },
+    "neurological_symptoms": {
+      "present": false,
+      "dizziness": false,
+      "confusion": false,
+      "weakness": false
+    },
+    "other_symptoms": {
+      "leg_swelling": false,
+      "sweating": true,
+      "nausea": false,
+      "fatigue": true
+    }
+  },
+
+  "vital_signs": {
+    "blood_pressure": {
+      "systolic": 145,
+      "diastolic": 92,
+      "unit": "mmHg",
+      "measurement_time": "2024-10-18T14:25:00Z",
+      "device": "manual_cuff"
+    },
+    "heart_rate": {
+      "resting": 95,
+      "unit": "bpm",
+      "rhythm": "irregular",
+      "measurement_time": "2024-10-18T14:25:00Z"
+    },
+    "oxygen_saturation": {
+      "value": 96,
+      "unit": "%",
+      "measurement_time": "2024-10-18T14:25:00Z",
+      "device": "pulse_oximeter"
+    },
+    "temperature": {
+      "value": 37.2,
+      "unit": "celsius",
+      "measurement_time": "2024-10-18T14:25:00Z"
+    },
+    "weight": {
+      "value": 78.5,
+      "unit": "kg",
+      "measurement_date": "2024-10-15T09:00:00Z"
+    },
+    "height": {
+      "value": 175,
+      "unit": "cm"
+    },
+    "bmi": {
+      "value": 25.6,
+      "category": "overweight"
+    }
+  },
+
+  "medical_history": {
+    "cardiovascular": {
+      "previous_heart_disease": false,
+      "heart_attack": false,
+      "stroke": false,
+      "heart_surgery": false,
+      "angina": false,
+      "arrhythmia": false
+    },
+    "chronic_conditions": {
+      "hypertension": true,
+      "diabetes": false,
+      "high_cholesterol": true,
+      "chronic_kidney_disease": false,
+      "obesity": false
+    },
+    "family_history": {
+      "heart_disease": true,
+      "stroke": false,
+      "diabetes": true,
+      "hypertension": true,
+      "age_of_onset": {
+        "father_heart_disease": 55,
+        "mother_hypertension": 48
+      }
+    },
+    "medications": {
+      "current_medications": [
+        {
+          "name": "Lisinopril",
+          "dosage": "10mg",
+          "frequency": "daily",
+          "start_date": "2023-06-01"
+        }
+      ],
+      "allergies": [
+        {
+          "medication": "Penicillin",
+          "reaction": "Rash",
+          "severity": "mild"
+        }
+      ]
+    }
+  },
+
+  "lifestyle_factors": {
+    "smoking": {
+      "current_smoker": false,
+      "former_smoker": true,
+      "quit_date": "2020-03-15",
+      "pack_years": 12,
+      "smoking_cessation_aids": ["nicotine_patches"]
+    },
+    "alcohol": {
+      "consumes_alcohol": true,
+      "frequency": "weekly",
+      "units_per_week": 3,
+      "binge_drinking": false
+    },
+    "exercise": {
+      "regular_exercise": true,
+      "frequency_per_week": 4,
+      "duration_minutes": 45,
+      "intensity": "moderate",
+      "activities": ["walking", "cycling", "swimming"]
+    },
+    "diet": {
+      "diet_type": "balanced",
+      "fruits_vegetables_daily": true,
+      "processed_foods": "moderate",
+      "sodium_intake": "moderate"
+    },
+    "stress": {
+      "stress_level": "moderate",
+      "work_stress": true,
+      "family_stress": false,
+      "coping_mechanisms": ["exercise", "meditation"]
+    },
+    "sleep": {
+      "average_hours": 7,
+      "sleep_quality": "good",
+      "sleep_apnea": false,
+      "insomnia": false
+    }
+  },
+
+  "risk_assessment_results": {
+    "likelihood_score": 4,
+    "likelihood_level": "Probable",
+    "impact_score": 3,
+    "impact_level": "Moderate",
+    "final_risk_score": 12,
+    "risk_category": "Moderate",
+    "color_code": "🟠 Yellow-orange",
+    "urgency": "routine",
+    "timeframe": "24-48 hours",
+    "confidence_level": 0.78
+  },
+
+  "recommendations": {
+    "immediate_action": "Book clinic / teleconsult in 24–48h",
+    "recommended_facilities": [
+      "Primary Care Clinic",
+      "Hospital"
+    ],
+    "care_plan": {
+      "monitoring": [
+        "Monitor blood pressure daily",
+        "Track symptoms and severity",
+        "Record heart rate and rhythm"
+      ],
+      "lifestyle_changes": [
+        "Continue regular exercise",
+        "Maintain low-sodium diet",
+        "Manage stress levels"
+      ],
+      "medical_follow_up": [
+        "Schedule cardiology consultation",
+        "Consider stress test",
+        "Review medication effectiveness"
+      ]
+    },
+    "emergency_instructions": {
+      "seek_immediate_care_if": [
+        "Chest pain worsens or lasts >20 minutes",
+        "Shortness of breath at rest",
+        "Fainting or near-fainting",
+        "Severe dizziness or confusion"
+      ],
+      "emergency_contacts": [
+        {
+          "name": "Emergency Services",
+          "number": "911",
+          "type": "emergency"
+        },
+        {
+          "name": "Philippine Heart Center",
+          "number": "+63-2-8926-0001",
+          "type": "specialized"
+        }
+      ]
+    }
+  },
+
+  "assessment_metadata": {
+    "assessment_duration_minutes": 8,
+    "completion_rate": 100,
+    "validation_errors": [],
+    "data_quality_score": 0.95,
+    "device_info": {
+      "platform": "Android",
+      "version": "13",
+      "app_version": "1.0.0",
+      "screen_resolution": "1080x2400"
+    },
+    "location_accuracy": {
+      "gps_accuracy_meters": 5,
+      "location_source": "gps"
+    }
+  },
+
+  "follow_up": {
+    "next_assessment_recommended": "2024-11-18T14:30:00Z",
+    "reminder_settings": {
+      "daily_reminders": true,
+      "weekly_check_ins": true,
+      "medication_reminders": true
+    },
+    "care_team": {
+      "primary_care_physician": {
+        "name": "Dr. Maria Santos",
+        "clinic": "Quezon City Medical Center",
+        "contact": "+63-2-8923-4567"
+      },
+      "cardiologist": {
+        "name": "Dr. Juan Dela Cruz",
+        "hospital": "Philippine Heart Center",
+        "contact": "+63-2-8926-0001"
+      }
+    }
+  },
+
+  "data_privacy": {
+    "consent_given": true,
+    "consent_date": "2024-10-18T14:30:22Z",
+    "data_sharing_preferences": {
+      "share_with_healthcare_providers": true,
+      "share_for_research": false,
+      "share_anonymized_data": true
+    },
+    "retention_period_years": 7,
+    "data_encryption": true,
+    "gdpr_compliant": true,
+    "hipaa_compliant": true
+  },
+
+  "technical_metadata": {
+    "api_version": "v1.0",
+    "assessment_algorithm_version": "2.1.0",
+    "model_confidence": 0.78,
+    "processing_time_ms": 1250,
+    "server_timestamp": "2024-10-18T14:30:23Z",
+    "client_timestamp": "2024-10-18T14:30:22Z",
+    "timezone": "Asia/Manila"
+  }
+}

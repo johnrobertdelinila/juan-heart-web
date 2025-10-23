@@ -1,0 +1,70 @@
+# Code Owners for Juan Heart Web Application
+#
+# These owners will be automatically requested for review when
+# someone opens a pull request that modifies files in these paths.
+#
+# Order matters! The last matching pattern takes precedence.
+# Documentation: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+*                                   @johnrobertdelinila
+
+# Backend Code
+/backend/**                         @johnrobertdelinila
+/backend/app/**                     @johnrobertdelinila
+/backend/app/Models/**              @johnrobertdelinila
+/backend/app/Http/Controllers/**    @johnrobertdelinila
+/backend/app/Services/**            @johnrobertdelinila
+/backend/database/**                @johnrobertdelinila
+/backend/database/migrations/**     @johnrobertdelinila
+/backend/routes/**                  @johnrobertdelinila
+/backend/config/**                  @johnrobertdelinila
+/backend/tests/**                   @johnrobertdelinila
+
+# Frontend Code
+/frontend/**                        @johnrobertdelinila
+/frontend/src/**                    @johnrobertdelinila
+/frontend/src/app/**                @johnrobertdelinila
+/frontend/src/components/**         @johnrobertdelinila
+/frontend/src/lib/**                @johnrobertdelinila
+/frontend/src/hooks/**              @johnrobertdelinila
+/frontend/src/types/**              @johnrobertdelinila
+/frontend/public/**                 @johnrobertdelinila
+
+# Infrastructure & DevOps
+/.github/**                         @johnrobertdelinila
+/.github/workflows/**               @johnrobertdelinila
+/docker-compose.yml                 @johnrobertdelinila
+/Dockerfile*                        @johnrobertdelinila
+/.dockerignore                      @johnrobertdelinila
+
+# Documentation
+/docs/**                            @johnrobertdelinila
+/*.md                               @johnrobertdelinila
+/CLAUDE.md                          @johnrobertdelinila
+/PLANNING.md                        @johnrobertdelinila
+/TASKS.md                           @johnrobertdelinila
+
+# Configuration Files
+/.env.example                       @johnrobertdelinila
+/backend/.env.example               @johnrobertdelinila
+/frontend/.env.example              @johnrobertdelinila
+/backend/config/**                  @johnrobertdelinila
+/frontend/next.config.js            @johnrobertdelinila
+/frontend/tailwind.config.ts        @johnrobertdelinila
+/frontend/tsconfig.json             @johnrobertdelinila
+/backend/composer.json              @johnrobertdelinila
+/frontend/package.json              @johnrobertdelinila
+
+# Security & Sensitive
+/.github/dependabot.yml             @johnrobertdelinila
+/.github/workflows/security.yml     @johnrobertdelinila
+/backend/app/Http/Middleware/**     @johnrobertdelinila
+
+# Testing
+/backend/tests/**                   @johnrobertdelinila
+/frontend/__tests__/**              @johnrobertdelinila
+/frontend/e2e/**                    @johnrobertdelinila
+
+# CI/CD
+/.github/workflows/**               @johnrobertdelinila

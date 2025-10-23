@@ -1,0 +1,324 @@
+{
+  "assessment_id": "ASSESS_2024_002",
+  "user_id": "USER_67890",
+  "session_id": "SESS_20241018_150045",
+  "timestamp": "2024-10-18T15:00:45Z",
+  "version": "1.0.0",
+  
+  "user_profile": {
+    "age": 67,
+    "sex": "Female",
+    "date_of_birth": "1957-08-22",
+    "location": {
+      "country": "Philippines",
+      "region": "Metro Manila",
+      "city": "Makati City",
+      "coordinates": {
+        "latitude": 14.5547,
+        "longitude": 121.0244
+      }
+    },
+    "language_preference": "fil",
+    "assessment_date": "2024-10-18T15:00:45Z"
+  },
+
+  "symptoms": {
+    "chest_pain": {
+      "present": true,
+      "type": "crushing",
+      "duration_minutes": 45,
+      "radiation": true,
+      "exertional": true,
+      "severity_scale": 9,
+      "description": "Severe crushing chest pain radiating to left arm and jaw"
+    },
+    "shortness_of_breath": {
+      "present": true,
+      "level": "severe",
+      "at_rest": true,
+      "with_exertion": true,
+      "description": "Cannot speak in full sentences, severe difficulty breathing"
+    },
+    "palpitations": {
+      "present": true,
+      "type": "irregular",
+      "duration_hours": 3,
+      "heart_rate": 140,
+      "description": "Rapid, irregular heartbeat with chest tightness"
+    },
+    "syncope": {
+      "present": true,
+      "episodes": 1,
+      "last_episode": "2024-10-18T14:45:00Z"
+    },
+    "fainting": {
+      "present": true,
+      "episodes": 1
+    },
+    "neurological_symptoms": {
+      "present": true,
+      "dizziness": true,
+      "confusion": true,
+      "weakness": true
+    },
+    "other_symptoms": {
+      "leg_swelling": true,
+      "sweating": true,
+      "nausea": true,
+      "fatigue": true
+    }
+  },
+
+  "vital_signs": {
+    "blood_pressure": {
+      "systolic": 185,
+      "diastolic": 115,
+      "unit": "mmHg",
+      "measurement_time": "2024-10-18T14:55:00Z",
+      "device": "manual_cuff"
+    },
+    "heart_rate": {
+      "resting": 140,
+      "unit": "bpm",
+      "rhythm": "irregular",
+      "measurement_time": "2024-10-18T14:55:00Z"
+    },
+    "oxygen_saturation": {
+      "value": 88,
+      "unit": "%",
+      "measurement_time": "2024-10-18T14:55:00Z",
+      "device": "pulse_oximeter"
+    },
+    "temperature": {
+      "value": 38.5,
+      "unit": "celsius",
+      "measurement_time": "2024-10-18T14:55:00Z"
+    },
+    "weight": {
+      "value": 85.2,
+      "unit": "kg",
+      "measurement_date": "2024-10-10T09:00:00Z"
+    },
+    "height": {
+      "value": 160,
+      "unit": "cm"
+    },
+    "bmi": {
+      "value": 33.3,
+      "category": "obese"
+    }
+  },
+
+  "medical_history": {
+    "cardiovascular": {
+      "previous_heart_disease": true,
+      "heart_attack": true,
+      "stroke": false,
+      "heart_surgery": true,
+      "angina": true,
+      "arrhythmia": true
+    },
+    "chronic_conditions": {
+      "hypertension": true,
+      "diabetes": true,
+      "high_cholesterol": true,
+      "chronic_kidney_disease": true,
+      "obesity": true
+    },
+    "family_history": {
+      "heart_disease": true,
+      "stroke": true,
+      "diabetes": true,
+      "hypertension": true,
+      "age_of_onset": {
+        "father_heart_disease": 45,
+        "mother_stroke": 52
+      }
+    },
+    "medications": {
+      "current_medications": [
+        {
+          "name": "Metformin",
+          "dosage": "1000mg",
+          "frequency": "twice_daily",
+          "start_date": "2022-01-15"
+        },
+        {
+          "name": "Amlodipine",
+          "dosage": "10mg",
+          "frequency": "daily",
+          "start_date": "2021-06-01"
+        },
+        {
+          "name": "Atorvastatin",
+          "dosage": "40mg",
+          "frequency": "daily",
+          "start_date": "2021-06-01"
+        }
+      ],
+      "allergies": []
+    }
+  },
+
+  "lifestyle_factors": {
+    "smoking": {
+      "current_smoker": true,
+      "former_smoker": false,
+      "quit_date": null,
+      "pack_years": 35,
+      "smoking_cessation_aids": []
+    },
+    "alcohol": {
+      "consumes_alcohol": true,
+      "frequency": "daily",
+      "units_per_week": 14,
+      "binge_drinking": true
+    },
+    "exercise": {
+      "regular_exercise": false,
+      "frequency_per_week": 0,
+      "duration_minutes": 0,
+      "intensity": "none",
+      "activities": []
+    },
+    "diet": {
+      "diet_type": "unhealthy",
+      "fruits_vegetables_daily": false,
+      "processed_foods": "high",
+      "sodium_intake": "high"
+    },
+    "stress": {
+      "stress_level": "high",
+      "work_stress": true,
+      "family_stress": true,
+      "coping_mechanisms": ["smoking", "alcohol"]
+    },
+    "sleep": {
+      "average_hours": 5,
+      "sleep_quality": "poor",
+      "sleep_apnea": true,
+      "insomnia": true
+    }
+  },
+
+  "risk_assessment_results": {
+    "likelihood_score": 5,
+    "likelihood_level": "Very Probable",
+    "impact_score": 5,
+    "impact_level": "Critical",
+    "final_risk_score": 25,
+    "risk_category": "Critical",
+    "color_code": "🟥 Red",
+    "urgency": "emergency",
+    "timeframe": "immediately",
+    "confidence_level": 0.95
+  },
+
+  "recommendations": {
+    "immediate_action": "Go to ER immediately and call emergency number",
+    "recommended_facilities": [
+      "Emergency Facility",
+      "Hospital"
+    ],
+    "care_plan": {
+      "emergency_protocol": [
+        "Call 911 immediately",
+        "Do not drive yourself",
+        "Take aspirin if available (unless allergic)",
+        "Stay calm and rest"
+      ],
+      "monitoring": [
+        "Continuous vital signs monitoring",
+        "ECG monitoring",
+        "Oxygen saturation monitoring"
+      ],
+      "medical_follow_up": [
+        "Immediate emergency department visit",
+        "Cardiology consultation within 24 hours",
+        "Cardiac catheterization if indicated"
+      ]
+    },
+    "emergency_instructions": {
+      "seek_immediate_care_if": [
+        "Chest pain worsens or lasts >20 minutes",
+        "Shortness of breath at rest",
+        "Fainting or near-fainting",
+        "Severe dizziness or confusion"
+      ],
+      "emergency_contacts": [
+        {
+          "name": "Emergency Services",
+          "number": "911",
+          "type": "emergency"
+        },
+        {
+          "name": "Philippine Heart Center Emergency",
+          "number": "+63-2-8926-0001",
+          "type": "specialized_emergency"
+        }
+      ]
+    }
+  },
+
+  "assessment_metadata": {
+    "assessment_duration_minutes": 12,
+    "completion_rate": 100,
+    "validation_errors": [],
+    "data_quality_score": 0.98,
+    "device_info": {
+      "platform": "iOS",
+      "version": "17.0",
+      "app_version": "1.0.0",
+      "screen_resolution": "1179x2556"
+    },
+    "location_accuracy": {
+      "gps_accuracy_meters": 3,
+      "location_source": "gps"
+    }
+  },
+
+  "follow_up": {
+    "next_assessment_recommended": "2024-10-25T15:00:00Z",
+    "reminder_settings": {
+      "daily_reminders": true,
+      "weekly_check_ins": true,
+      "medication_reminders": true
+    },
+    "care_team": {
+      "primary_care_physician": {
+        "name": "Dr. Ana Reyes",
+        "clinic": "Makati Medical Center",
+        "contact": "+63-2-8888-9999"
+      },
+      "cardiologist": {
+        "name": "Dr. Roberto Cruz",
+        "hospital": "Philippine Heart Center",
+        "contact": "+63-2-8926-0001"
+      }
+    }
+  },
+
+  "data_privacy": {
+    "consent_given": true,
+    "consent_date": "2024-10-18T15:00:45Z",
+    "data_sharing_preferences": {
+      "share_with_healthcare_providers": true,
+      "share_for_research": true,
+      "share_anonymized_data": true
+    },
+    "retention_period_years": 7,
+    "data_encryption": true,
+    "gdpr_compliant": true,
+    "hipaa_compliant": true
+  },
+
+  "technical_metadata": {
+    "api_version": "v1.0",
+    "assessment_algorithm_version": "2.1.0",
+    "model_confidence": 0.95,
+    "processing_time_ms": 2100,
+    "server_timestamp": "2024-10-18T15:00:46Z",
+    "client_timestamp": "2024-10-18T15:00:45Z",
+    "timezone": "Asia/Manila"
+  }
+}
