@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AssessmentController;
 use App\Http\Controllers\Api\FacilityAnalyticsController;
 use App\Http\Controllers\Api\ClinicalDashboardController;
+use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\ReferralController;
 use App\Http\Controllers\Api\Auth\DeviceTrustController;
 use App\Http\Controllers\Api\Auth\LoginController;
@@ -12,6 +13,8 @@ use App\Http\Controllers\Api\Auth\MfaController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\Auth\RegisteredUserController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\Mobile\FacilityController as MobileFacilityController;
+use App\Http\Controllers\Api\Mobile\EducationalContentController as MobileEducationalContentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -85,9 +88,65 @@ Route::prefix('referrals')->group(function () {
 Route::prefix('assessments')->group(function () {
     Route::get('/statistics', [AssessmentController::class, 'statistics']);
     Route::get('/', [AssessmentController::class, 'index']);
+    Route::post('/', [AssessmentController::class, 'store']); // Mobile app endpoint
     Route::get('/{id}', [AssessmentController::class, 'show']);
     Route::post('/{id}/validate', [AssessmentController::class, 'validate']);
     Route::post('/export', [AssessmentController::class, 'export']);
+});
+
+// Temporarily public patient routes for testing (will require auth in production)
+Route::prefix('patients')->group(function () {
+    Route::get('/statistics', [PatientController::class, 'statistics']);
+    Route::get('/', [PatientController::class, 'index']);
+    Route::get('/{id}', [PatientController::class, 'show']);
+});
+
+// Public appointments route for mobile app (no authentication required)
+Route::prefix('appointments')->group(function () {
+    // Mobile app booking endpoint (public)
+    Route::post('/', [AppointmentController::class, 'store']);
+});
+
+// Mobile-specific facility routes (public for testing, will require auth later)
+Route::prefix('mobile/facilities')->group(function () {
+    // Get all active facilities
+    Route::get('/', [MobileFacilityController::class, 'index']);
+
+    // Get facilities updated since timestamp (incremental sync)
+    Route::get('/sync', [MobileFacilityController::class, 'sync']);
+
+    // Get facility count and statistics
+    Route::get('/count', [MobileFacilityController::class, 'count']);
+
+    // Get unique list of regions
+    Route::get('/regions', [MobileFacilityController::class, 'regions']);
+
+    // Get unique list of facility types
+    Route::get('/types', [MobileFacilityController::class, 'types']);
+
+    // Search facilities near coordinates (geospatial)
+    Route::get('/nearby', [MobileFacilityController::class, 'nearby']);
+
+    // Get single facility by ID
+    Route::get('/{id}', [MobileFacilityController::class, 'show']);
+});
+
+// Mobile-specific educational content routes (public for testing, will require auth later)
+Route::prefix('mobile/educational-content')->group(function () {
+    // Get all published educational content
+    Route::get('/', [MobileEducationalContentController::class, 'index']);
+
+    // Get content updated since timestamp (incremental sync)
+    Route::get('/sync', [MobileEducationalContentController::class, 'sync']);
+
+    // Get available categories
+    Route::get('/categories', [MobileEducationalContentController::class, 'categories']);
+
+    // Get content statistics
+    Route::get('/stats', [MobileEducationalContentController::class, 'stats']);
+
+    // Get single content by ID (increments view count)
+    Route::get('/{id}', [MobileEducationalContentController::class, 'show']);
 });
 
 // Protected routes (require authentication)
@@ -245,8 +304,9 @@ Route::middleware('auth:sanctum')->group(function () {
             ->middleware('permission:view-appointments');
 
         // Book appointment (nurses, doctors, cardiologists, admins)
-        Route::post('/', [AppointmentController::class, 'store'])
-            ->middleware('permission:create-appointments');
+        // COMMENTED OUT: Now using public route for mobile app bookings (see line 105)
+        // Route::post('/', [AppointmentController::class, 'store'])
+        //     ->middleware('permission:create-appointments');
 
         // Reschedule appointment
         Route::post('/{id}/reschedule', [AppointmentController::class, 'reschedule'])
@@ -273,43 +333,43 @@ Route::middleware('auth:sanctum')->group(function () {
             ->middleware('permission:manage-waiting-list');
     });
 
-    // Patients
-    Route::prefix('patients')->group(function () {
-        // View patients (all medical staff can view)
-        Route::get('/', function () {
-            return response()->json(['message' => 'List patients']);
-        })->middleware('permission:view-patients');
+    // Patients (Protected - TODO: uncomment when authentication is fully implemented)
+    // Route::prefix('patients')->group(function () {
+    //     // View patients (all medical staff can view)
+    //     Route::get('/', function () {
+    //         return response()->json(['message' => 'List patients']);
+    //     })->middleware('permission:view-patients');
 
-        // View single patient
-        Route::get('/{id}', function ($id) {
-            return response()->json(['message' => 'View patient ' . $id]);
-        })->middleware('permission:view-patients');
+    //     // View single patient
+    //     Route::get('/{id}', function ($id) {
+    //         return response()->json(['message' => 'View patient ' . $id]);
+    //     })->middleware('permission:view-patients');
 
-        // Create patient (nurses, doctors, cardiologists, admins)
-        Route::post('/', function () {
-            return response()->json(['message' => 'Create patient']);
-        })->middleware('permission:create-patients');
+    //     // Create patient (nurses, doctors, cardiologists, admins)
+    //     Route::post('/', function () {
+    //         return response()->json(['message' => 'Create patient']);
+    //     })->middleware('permission:create-patients');
 
-        // Edit patient (doctors, cardiologists, admins)
-        Route::put('/{id}', function ($id) {
-            return response()->json(['message' => 'Edit patient ' . $id]);
-        })->middleware('permission:edit-patients');
+    //     // Edit patient (doctors, cardiologists, admins)
+    //     Route::put('/{id}', function ($id) {
+    //         return response()->json(['message' => 'Edit patient ' . $id]);
+    //     })->middleware('permission:edit-patients');
 
-        // Delete patient (admins only)
-        Route::delete('/{id}', function ($id) {
-            return response()->json(['message' => 'Delete patient ' . $id]);
-        })->middleware('permission:delete-patients');
+    //     // Delete patient (admins only)
+    //     Route::delete('/{id}', function ($id) {
+    //         return response()->json(['message' => 'Delete patient ' . $id]);
+    //     })->middleware('permission:delete-patients');
 
-        // View patient history (doctors, cardiologists, admins)
-        Route::get('/{id}/history', function ($id) {
-            return response()->json(['message' => 'View patient history ' . $id]);
-        })->middleware('permission:view-patient-history');
+    //     // View patient history (doctors, cardiologists, admins)
+    //     Route::get('/{id}/history', function ($id) {
+    //         return response()->json(['message' => 'View patient history ' . $id]);
+    //     })->middleware('permission:view-patient-history');
 
-        // Export patients (data analysts, admins)
-        Route::post('/export', function () {
-            return response()->json(['message' => 'Export patients']);
-        })->middleware('permission:export-patients');
-    });
+    //     // Export patients (data analysts, admins)
+    //     Route::post('/export', function () {
+    //         return response()->json(['message' => 'Export patients']);
+    //     })->middleware('permission:export-patients');
+    // });
 
     // Facilities
     Route::prefix('facilities')->group(function () {

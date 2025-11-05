@@ -16,7 +16,9 @@ class Appointment extends Model
      * @var array<string>
      */
     protected $fillable = [
+        'mobile_appointment_id',
         'referral_id',
+        'assessment_id',
         'patient_first_name',
         'patient_last_name',
         'patient_email',
@@ -85,6 +87,14 @@ class Appointment extends Model
     public function referral()
     {
         return $this->belongsTo(Referral::class);
+    }
+
+    /**
+     * Get the assessment associated with this appointment.
+     */
+    public function assessment()
+    {
+        return $this->belongsTo(Assessment::class);
     }
 
     /**

@@ -1,109 +1,254 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, Search, Filter, UserPlus } from 'lucide-react';
+import { DataTable } from '@/components/ui/data-table';
+import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
+import { DataTableToolbar } from '@/components/ui/data-table-toolbar';
+import { DataTablePagination } from '@/components/ui/data-table-pagination';
+import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
+import type { Table } from '@tanstack/react-table';
+import { Users, UserPlus } from 'lucide-react';
+import { getPatients, getPatientStatistics } from '@/lib/api/patient';
+import type { Patient, PatientStatistics } from '@/types/patient';
 
-interface Patient {
-  id: number;
-  name: string;
-  age: number;
-  sex: string;
-  lastAssessment: string;
-  riskLevel: 'High' | 'Moderate' | 'Low';
-  totalAssessments: number;
-  status: 'Active' | 'Follow-up' | 'Discharged';
-}
+// Column definitions
+const columns: ColumnDef<Patient>[] = [
+  {
+    accessorKey: 'patient_full_name',
+    id: 'patient_full_name',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Patient Name" />
+    ),
+    cell: ({ row }) => {
+      const patient = row.original;
+      return (
+        <div className="flex items-center gap-3">
+          <div className="bg-heart-red/10 flex h-10 w-10 items-center justify-center rounded-full">
+            <Users className="text-heart-red h-5 w-5" strokeWidth={1.5} />
+          </div>
+          <span className="text-midnight-blue font-medium">
+            {patient.patient_full_name}
+          </span>
+        </div>
+      );
+    },
+    enableSorting: true,
+    enableHiding: false,
+  },
+  {
+    id: 'age_sex',
+    accessorFn: (row) => `${getAge(row.patient_date_of_birth)}y / ${row.patient_sex}`,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Age / Sex" />
+    ),
+    cell: ({ row }) => {
+      const patient = row.original;
+      return (
+        <span className="text-sm text-gray-700">
+          {getAge(patient.patient_date_of_birth)}y / {patient.patient_sex}
+        </span>
+      );
+    },
+    enableSorting: true,
+  },
+  {
+    accessorKey: 'latest_risk_level',
+    id: 'latest_risk_level',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Risk Level" />
+    ),
+    cell: ({ row }) => {
+      const riskLevel = row.getValue('latest_risk_level') as string;
+      return (
+        <Badge className={getRiskColor(riskLevel)}>
+          {riskLevel}
+        </Badge>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+    enableSorting: true,
+  },
+  {
+    accessorKey: 'status',
+    id: 'status',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
+    cell: ({ row }) => {
+      const status = row.getValue('status') as string;
+      return (
+        <Badge className={getStatusColor(status)}>
+          {status}
+        </Badge>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+    enableSorting: true,
+  },
+  {
+    accessorKey: 'last_assessment_date',
+    id: 'last_assessment_date',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Last Assessment" />
+    ),
+    cell: ({ row }) => {
+      const date = row.getValue('last_assessment_date') as string;
+      return (
+        <span className="text-sm text-gray-700">
+          {formatDate(date)}
+        </span>
+      );
+    },
+    enableSorting: true,
+  },
+  {
+    accessorKey: 'total_assessments',
+    id: 'total_assessments',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Total Assessments" />
+    ),
+    cell: ({ row }) => {
+      const count = row.getValue('total_assessments') as number;
+      return (
+        <span className="text-sm text-gray-700 text-center block font-mono">
+          {count}
+        </span>
+      );
+    },
+    enableSorting: true,
+  },
+  {
+    id: 'actions',
+    header: () => <div className="text-right">Actions</div>,
+    cell: () => {
+      return (
+        <div className="text-right">
+          <Button variant="outline" size="sm">
+            View Profile
+          </Button>
+        </div>
+      );
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
+];
+
+// Helper functions
+const getAge = (dateOfBirth: string): number => {
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
+const getRiskColor = (risk: string) => {
+  switch (risk) {
+    case 'High':
+      return 'bg-red-100 text-red-800';
+    case 'Moderate':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'Low':
+      return 'bg-green-100 text-green-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Active':
+      return 'bg-green-100 text-green-800';
+    case 'Follow-up':
+      return 'bg-blue-100 text-blue-800';
+    case 'Discharged':
+      return 'bg-gray-100 text-gray-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [stats, setStats] = useState<PatientStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [table, setTable] = useState<Table<Patient> | null>(null);
 
   useEffect(() => {
-    // Simulate data loading
-    setTimeout(() => {
-      setPatients([
-        {
-          id: 1,
-          name: 'Maria Santos',
-          age: 58,
-          sex: 'Female',
-          lastAssessment: '2024-10-22',
-          riskLevel: 'High',
-          totalAssessments: 5,
-          status: 'Active',
-        },
-        {
-          id: 2,
-          name: 'Juan Dela Cruz',
-          age: 45,
-          sex: 'Male',
-          lastAssessment: '2024-10-20',
-          riskLevel: 'Moderate',
-          totalAssessments: 3,
-          status: 'Follow-up',
-        },
-        {
-          id: 3,
-          name: 'Ana Garcia',
-          age: 34,
-          sex: 'Female',
-          lastAssessment: '2024-10-18',
-          riskLevel: 'Low',
-          totalAssessments: 2,
-          status: 'Active',
-        },
-        {
-          id: 4,
-          name: 'Pedro Reyes',
-          age: 62,
-          sex: 'Male',
-          lastAssessment: '2024-10-22',
-          riskLevel: 'High',
-          totalAssessments: 7,
-          status: 'Active',
-        },
-        {
-          id: 5,
-          name: 'Sofia Lim',
-          age: 51,
-          sex: 'Female',
-          lastAssessment: '2024-10-15',
-          riskLevel: 'Moderate',
-          totalAssessments: 4,
-          status: 'Discharged',
-        },
-      ]);
-      setIsLoading(false);
-    }, 500);
+    const fetchData = async () => {
+      try {
+        // Fetch patients list
+        const patientsResponse = await getPatients({ per_page: 100 });
+
+        // Fetch statistics
+        const statsResponse = await getPatientStatistics();
+
+        if (patientsResponse.success) {
+          setPatients(patientsResponse.data);
+        }
+
+        if (statsResponse.success) {
+          setStats(statsResponse.data);
+        }
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const getRiskColor = (risk: string) => {
-    switch (risk) {
-      case 'High':
-        return 'bg-red-100 text-red-800';
-      case 'Moderate':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Low':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // Export handler
+  const handleExport = () => {
+    if (!table) return;
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-100 text-green-800';
-      case 'Follow-up':
-        return 'bg-blue-100 text-blue-800';
-      case 'Discharged':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+    const rows = table.getFilteredRowModel().rows;
+    const csv = [
+      ['Patient Name', 'Age', 'Sex', 'Risk Level', 'Status', 'Last Assessment', 'Total Assessments'].join(','),
+      ...rows.map((row) => {
+        const patient = row.original;
+        return [
+          patient.patient_full_name,
+          getAge(patient.patient_date_of_birth),
+          patient.patient_sex,
+          patient.latest_risk_level,
+          patient.status,
+          formatDate(patient.last_assessment_date),
+          patient.total_assessments,
+        ].join(',');
+      }),
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patients-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   if (isLoading) {
@@ -122,53 +267,59 @@ export default function PatientsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-midnight-blue text-3xl font-bold">Patients</h1>
+          <h1 className="text-midnight-blue text-4xl md:text-5xl font-semibold tracking-tight">Patients</h1>
           <p className="mt-2 text-gray-600">
             Manage patient records and track cardiovascular health
           </p>
         </div>
         <Button>
-          <UserPlus className="mr-2 h-4 w-4" />
+          <UserPlus className="mr-2 h-4 w-4 text-white" />
           Add Patient
         </Button>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-4">
-        <Card>
+        <Card index={0}>
           <CardHeader className="pb-3">
             <CardDescription>Total Patients</CardDescription>
-            <CardTitle className="text-3xl">892</CardTitle>
+            <CardTitle className="text-3xl font-semibold tracking-tight font-mono tabular-nums">{stats?.total_patients.toLocaleString() || 0}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-gray-600">+8% from last month</p>
+            <p className="text-xs text-gray-600">All time</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card index={1}>
           <CardHeader className="pb-3">
             <CardDescription>Active Patients</CardDescription>
-            <CardTitle className="text-3xl text-green-600">645</CardTitle>
+            <CardTitle className="text-3xl font-semibold tracking-tight font-mono tabular-nums text-green-600">
+              {stats?.active_patients || 0}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-gray-600">Currently monitored</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card index={2}>
           <CardHeader className="pb-3">
             <CardDescription>Follow-up Required</CardDescription>
-            <CardTitle className="text-3xl text-blue-600">127</CardTitle>
+            <CardTitle className="text-3xl font-semibold tracking-tight font-mono tabular-nums text-blue-600">
+              {stats?.follow_up_patients || 0}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-gray-600">Scheduled visits</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card index={3}>
           <CardHeader className="pb-3">
             <CardDescription>High Risk Patients</CardDescription>
-            <CardTitle className="text-3xl text-red-600">89</CardTitle>
+            <CardTitle className="text-3xl font-semibold tracking-tight font-mono tabular-nums text-red-600">
+              {stats?.high_risk_patients || 0}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-gray-600">Requires attention</p>
@@ -177,73 +328,66 @@ export default function PatientsPage() {
       </div>
 
       {/* Patients List */}
-      <Card>
+      <Card index={4}>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Patient Registry</CardTitle>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Search className="mr-2 h-4 w-4" />
-                Search
-              </Button>
-              <Button variant="outline" size="sm">
-                <Filter className="mr-2 h-4 w-4" />
-                Filter
-              </Button>
-            </div>
-          </div>
+          <CardTitle>Patient Registry</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="pb-3 text-left text-sm font-medium text-gray-600">Patient Name</th>
-                  <th className="pb-3 text-left text-sm font-medium text-gray-600">Age/Sex</th>
-                  <th className="pb-3 text-left text-sm font-medium text-gray-600">Risk Level</th>
-                  <th className="pb-3 text-left text-sm font-medium text-gray-600">Status</th>
-                  <th className="pb-3 text-left text-sm font-medium text-gray-600">
-                    Last Assessment
-                  </th>
-                  <th className="pb-3 text-left text-sm font-medium text-gray-600">
-                    Total Assessments
-                  </th>
-                  <th className="pb-3 text-right text-sm font-medium text-gray-600">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {patients.map((patient) => (
-                  <tr key={patient.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-heart-red/10 flex h-10 w-10 items-center justify-center rounded-full">
-                          <Users className="text-heart-red h-5 w-5" />
-                        </div>
-                        <span className="text-midnight-blue font-medium">{patient.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 text-sm text-gray-700">
-                      {patient.age}y / {patient.sex}
-                    </td>
-                    <td className="py-4">
-                      <Badge className={getRiskColor(patient.riskLevel)}>{patient.riskLevel}</Badge>
-                    </td>
-                    <td className="py-4">
-                      <Badge className={getStatusColor(patient.status)}>{patient.status}</Badge>
-                    </td>
-                    <td className="py-4 text-sm text-gray-700">{patient.lastAssessment}</td>
-                    <td className="py-4 text-center text-sm text-gray-700">
-                      {patient.totalAssessments}
-                    </td>
-                    <td className="py-4 text-right">
-                      <Button variant="outline" size="sm">
-                        View Profile
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-4">
+            {/* Toolbar with search and filters */}
+            {table && (
+              <DataTableToolbar
+                table={table}
+                searchKey="patient_full_name"
+                searchPlaceholder="Search by patient name..."
+                filterComponents={
+                  <>
+                    <DataTableFacetedFilter
+                      column={table.getColumn('latest_risk_level')}
+                      title="Risk Level"
+                      options={[
+                        { label: 'High', value: 'High' },
+                        { label: 'Moderate', value: 'Moderate' },
+                        { label: 'Low', value: 'Low' },
+                      ]}
+                    />
+                    <DataTableFacetedFilter
+                      column={table.getColumn('status')}
+                      title="Status"
+                      options={[
+                        { label: 'Active', value: 'Active' },
+                        { label: 'Follow-up', value: 'Follow-up' },
+                        { label: 'Discharged', value: 'Discharged' },
+                      ]}
+                    />
+                  </>
+                }
+                onExport={handleExport}
+              />
+            )}
+
+            {/* Data Table */}
+            <DataTable
+              columns={columns}
+              data={patients}
+              loading={isLoading}
+              enableSorting={true}
+              enableFiltering={true}
+              enableRowSelection={false}
+              enablePagination={true}
+              pageSize={10}
+              pageSizeOptions={[10, 20, 50, 100]}
+              onTableReady={setTable}
+            />
+
+            {/* Pagination */}
+            {table && (
+              <DataTablePagination
+                table={table}
+                pageSizeOptions={[10, 20, 50, 100]}
+                showSelectedCount={false}
+              />
+            )}
           </div>
         </CardContent>
       </Card>

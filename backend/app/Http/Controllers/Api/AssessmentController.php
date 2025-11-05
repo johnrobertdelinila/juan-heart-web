@@ -70,6 +70,80 @@ class AssessmentController extends Controller
     }
 
     /**
+     * Store assessment from mobile app
+     */
+    public function store(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'mobile_user_id' => 'required|string',
+                'session_id' => 'required|string',
+                'assessment_external_id' => 'nullable|string',
+                'patient_first_name' => 'nullable|string',
+                'patient_last_name' => 'nullable|string',
+                'patient_date_of_birth' => 'nullable|date',
+                'patient_sex' => 'nullable|string',
+                'patient_email' => 'nullable|email',
+                'patient_phone' => 'nullable|string',
+                'assessment_date' => 'required|date',
+                'version' => 'nullable|string',
+                'region' => 'nullable|string',
+                'city' => 'nullable|string',
+                'latitude' => 'nullable|numeric',
+                'longitude' => 'nullable|numeric',
+                'final_risk_score' => 'required|integer|min:1|max:25',
+                'final_risk_level' => 'required|string',
+                'urgency' => 'nullable|string',
+                'recommended_action' => 'nullable|string',
+                'vital_signs' => 'nullable|array',
+                'symptoms' => 'nullable|array',
+                'medical_history' => 'nullable|array',
+                'medications' => 'nullable|array',
+                'lifestyle' => 'nullable|array',
+                'recommendations' => 'nullable|array',
+                'device_platform' => 'nullable|string',
+                'device_version' => 'nullable|string',
+                'app_version' => 'nullable|string',
+                'mobile_created_at' => 'nullable|date',
+            ]);
+
+            // Create assessment
+            $assessment = Assessment::create(array_merge($validated, [
+                'status' => 'pending',
+                'synced_at' => now(),
+                'country' => 'Philippines', // Default
+            ]));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Assessment saved successfully',
+                'data' => [
+                    'id' => $assessment->id,
+                    'assessment_external_id' => $assessment->assessment_external_id,
+                    'synced_at' => $assessment->synced_at,
+                ],
+                'timestamp' => now()->toIso8601String(),
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+                'timestamp' => now()->toIso8601String(),
+            ], 422);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save assessment',
+                'error' => $e->getMessage(),
+                'timestamp' => now()->toIso8601String(),
+            ], 500);
+        }
+    }
+
+    /**
      * Get assessment statistics
      */
     public function statistics(Request $request): JsonResponse

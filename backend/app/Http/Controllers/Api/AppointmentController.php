@@ -206,18 +206,69 @@ class AppointmentController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        // 🔧 FIX: Check for duplicate mobile_appointment_id first (idempotency)
+        if ($request->has('mobile_appointment_id') && !empty($request->mobile_appointment_id)) {
+            $existingAppointment = Appointment::where('mobile_appointment_id', $request->mobile_appointment_id)
+                                              ->with(['facility', 'doctor', 'assessment'])
+                                              ->first();
+
+            if ($existingAppointment) {
+                Log::info("✅ Idempotent sync: Appointment already exists", [
+                    'mobile_appointment_id' => $request->mobile_appointment_id,
+                    'backend_id' => $existingAppointment->id,
+                ]);
+
+                // Return existing appointment with 200 OK (not 422)
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Appointment already exists (idempotent sync)',
+                    'data' => $existingAppointment,
+                    'already_exists' => true,
+                    'timestamp' => now()->toISOString(),
+                ], 200);
+            }
+        }
+
+        // 🔧 FIX: Determine if this is a mobile booking for offline-first sync
+        $isMobileBooking = $request->get('booking_source') === 'mobile' ||
+                          $request->has('mobile_appointment_id');
+
         $validator = Validator::make($request->all(), [
+            // Mobile app tracking - removed 'unique' rule since we handle it above
+            'mobile_appointment_id' => 'nullable|string',
+
+            // Patient information
             'patient_first_name' => 'required|string|max:255',
             'patient_last_name' => 'required|string|max:255',
             'patient_phone' => 'required|string|max:20',
             'patient_email' => 'nullable|email|max:255',
-            'facility_id' => 'required|exists:healthcare_facilities,id',
-            'doctor_id' => 'required|exists:users,id',
-            'appointment_datetime' => 'required|date|after:now',
+
+            // Facility and doctor (allow name-based lookup for mobile app)
+            'facility_id' => 'nullable|exists:healthcare_facilities,id',
+            'facility_name' => 'nullable|string|max:255',
+            'doctor_id' => 'nullable|exists:users,id',
+            'doctor_name' => 'nullable|string|max:255',
+
+            // Appointment details
+            // 🔧 FIX: Allow past dates for mobile bookings (offline-first sync)
+            // Mobile apps create appointments offline, may sync hours/days later
+            'appointment_datetime' => $isMobileBooking
+                ? 'required|date'  // Mobile: Allow any date (offline sync scenario)
+                : 'required|date|after:now',  // Web/phone: Must be future
             'duration_minutes' => 'integer|min:15|max:120',
             'appointment_type' => 'required|in:consultation,follow_up,procedure,emergency,telemedicine,screening,other',
             'reason_for_visit' => 'required|string|max:1000',
             'special_requirements' => 'nullable|string|max:500',
+
+            // Assessment integration
+            'assessment_id' => 'nullable|exists:assessments,id',
+            'assessment_external_id' => 'nullable|string',
+
+            // Booking source
+            'booking_source' => 'nullable|in:web,mobile,phone,walk_in',
+
+            // Mobile app timestamps
+            'mobile_created_at' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -229,16 +280,90 @@ class AppointmentController extends Controller
         }
 
         try {
-            $appointment = $this->appointmentService->bookAppointment([
-                ...$request->all(),
-                'booked_by' => auth()->id(),
-                'booking_source' => 'web',
-            ]);
+            $data = $request->all();
+
+            // Resolve facility by name if ID not provided (mobile app compatibility)
+            if (!isset($data['facility_id']) && isset($data['facility_name'])) {
+                // Try exact match first
+                $facility = \App\Models\HealthcareFacility::where('name', $data['facility_name'])->first();
+
+                // Try fuzzy match if exact match fails
+                if (!$facility) {
+                    $facility = \App\Models\HealthcareFacility::where('name', 'LIKE', '%' . $data['facility_name'] . '%')
+                        ->first();
+                }
+
+                if ($facility) {
+                    $data['facility_id'] = $facility->id;
+                    Log::info("Facility mapped: {$data['facility_name']} -> ID {$facility->id}");
+                } else {
+                    // Create placeholder facility for unmapped mobile facilities
+                    // Determine facility type based on name keywords
+                    $facilityType = 'Primary Care Clinic'; // Default
+                    $nameLower = strtolower($data['facility_name']);
+
+                    if (str_contains($nameLower, 'barangay')) {
+                        $facilityType = 'Barangay Health Center';
+                    } elseif (str_contains($nameLower, 'rural')) {
+                        $facilityType = 'Rural Health Unit';
+                    } elseif (str_contains($nameLower, 'district')) {
+                        $facilityType = 'District Hospital';
+                    } elseif (str_contains($nameLower, 'provincial')) {
+                        $facilityType = 'Provincial Hospital';
+                    } elseif (str_contains($nameLower, 'regional')) {
+                        $facilityType = 'Regional Hospital';
+                    } elseif (str_contains($nameLower, 'medical center') || str_contains($nameLower, 'medical centre')) {
+                        $facilityType = 'Medical Center';
+                    } elseif (str_contains($nameLower, 'specialty') || str_contains($nameLower, 'speciality')) {
+                        $facilityType = 'Specialty Center';
+                    } elseif (str_contains($nameLower, 'emergency')) {
+                        $facilityType = 'Emergency Facility';
+                    } elseif (str_contains($nameLower, 'hospital') || str_contains($nameLower, 'clinic')) {
+                        $facilityType = 'Tertiary Hospital';
+                    }
+
+                    $facility = \App\Models\HealthcareFacility::create([
+                        'name' => $data['facility_name'],
+                        'type' => $facilityType,
+                        'region' => 'Unknown',
+                        'city' => 'To be verified',
+                        'province' => 'To be verified',
+                        'address' => 'To be verified',
+                        'latitude' => 0.0,
+                        'longitude' => 0.0,
+                        'is_verified' => false,
+                        'created_from_mobile' => true,
+                        'is_active' => true,
+                        'accepts_referrals' => false,
+                    ]);
+
+                    $data['facility_id'] = $facility->id;
+                    Log::warning("Created placeholder facility: {$data['facility_name']} (ID {$facility->id}, Type: {$facilityType})");
+                }
+            }
+
+            // Resolve assessment by external ID if assessment_id not provided
+            if (!isset($data['assessment_id']) && isset($data['assessment_external_id'])) {
+                $assessment = \App\Models\Assessment::where('assessment_external_id', $data['assessment_external_id'])->first();
+                if ($assessment) {
+                    $data['assessment_id'] = $assessment->id;
+                }
+            }
+
+            // Set booking source
+            $data['booking_source'] = $request->get('booking_source', auth()->check() ? 'web' : 'mobile');
+
+            // Set booked_by if authenticated
+            if (auth()->check()) {
+                $data['booked_by'] = auth()->id();
+            }
+
+            $appointment = $this->appointmentService->bookAppointment($data);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Appointment booked successfully',
-                'data' => $appointment->load(['facility', 'doctor']),
+                'data' => $appointment->load(['facility', 'doctor', 'assessment']),
                 'timestamp' => now()->toISOString(),
             ], 201);
         } catch (\Exception $e) {
@@ -257,8 +382,14 @@ class AppointmentController extends Controller
      */
     public function reschedule(Request $request, int $id): JsonResponse
     {
+        // 🔧 FIX: Allow past dates for mobile bookings (offline-first sync)
+        $isMobileBooking = $request->get('booking_source') === 'mobile' ||
+                          $request->has('mobile_appointment_id');
+
         $validator = Validator::make($request->all(), [
-            'new_datetime' => 'required|date|after:now',
+            'new_datetime' => $isMobileBooking
+                ? 'required|date'  // Mobile: Allow any date
+                : 'required|date|after:now',  // Web: Must be future
             'reason' => 'nullable|string|max:500',
         ]);
 

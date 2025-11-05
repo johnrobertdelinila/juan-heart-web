@@ -50,8 +50,8 @@ export default function ClinicalDashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   // TODO: Get actual user ID from auth context
-  // Using cardiologist user ID (34) for demo purposes
-  const userId = 34;
+  // Using valid user ID (1) for demo purposes - this user exists in database
+  const userId = 1;
 
   useEffect(() => {
     async function loadDashboard() {

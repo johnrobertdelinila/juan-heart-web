@@ -52,6 +52,8 @@ class HealthcareFacility extends Model
         'preferred_referral_types',
         'is_active',
         'status_notes',
+        'is_verified',
+        'created_from_mobile',
     ];
 
     /**
@@ -79,6 +81,8 @@ class HealthcareFacility extends Model
             'average_response_time_hours' => 'integer',
             'preferred_referral_types' => 'array',
             'is_active' => 'boolean',
+            'is_verified' => 'boolean',
+            'created_from_mobile' => 'boolean',
             'deleted_at' => 'datetime',
         ];
     }

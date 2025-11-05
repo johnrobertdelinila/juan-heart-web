@@ -15,8 +15,13 @@ class AppointmentService
     /**
      * Check doctor availability for a given date/time.
      */
-    public function checkAvailability(int $facilityId, int $doctorId, Carbon $dateTime, int $durationMinutes = 30): array
+    public function checkAvailability(int $facilityId, ?int $doctorId, Carbon $dateTime, int $durationMinutes = 30): array
     {
+        // If no specific doctor, just check facility availability
+        if ($doctorId === null) {
+            return ['available' => true, 'reason' => 'No specific doctor required'];
+        }
+
         // Check if doctor has regular schedule for this day
         $dayOfWeek = $dateTime->dayOfWeekIso; // 1 = Monday, 7 = Sunday
         $time = $dateTime->format('H:i:s');
@@ -166,28 +171,32 @@ class AppointmentService
         return DB::transaction(function () use ($data) {
             $appointmentDateTime = Carbon::parse($data['appointment_datetime']);
 
-            // Check availability
-            $availability = $this->checkAvailability(
-                $data['facility_id'],
-                $data['doctor_id'],
-                $appointmentDateTime,
-                $data['duration_minutes'] ?? 30
-            );
+            // Check availability only if doctor is specified
+            if (!empty($data['doctor_id'])) {
+                $availability = $this->checkAvailability(
+                    $data['facility_id'],
+                    $data['doctor_id'],
+                    $appointmentDateTime,
+                    $data['duration_minutes'] ?? 30
+                );
 
-            if (!$availability['available']) {
-                throw new \Exception('Time slot not available: ' . $availability['reason']);
+                if (!$availability['available']) {
+                    throw new \Exception('Time slot not available: ' . $availability['reason']);
+                }
             }
 
             // Create appointment
             $appointment = Appointment::create([
+                'mobile_appointment_id' => $data['mobile_appointment_id'] ?? null,
                 'referral_id' => $data['referral_id'] ?? null,
+                'assessment_id' => $data['assessment_id'] ?? null,
                 'patient_first_name' => $data['patient_first_name'],
                 'patient_last_name' => $data['patient_last_name'],
                 'patient_email' => $data['patient_email'] ?? null,
                 'patient_phone' => $data['patient_phone'],
                 'patient_date_of_birth' => $data['patient_date_of_birth'] ?? null,
                 'facility_id' => $data['facility_id'],
-                'doctor_id' => $data['doctor_id'],
+                'doctor_id' => $data['doctor_id'] ?? null,
                 'appointment_datetime' => $appointmentDateTime,
                 'duration_minutes' => $data['duration_minutes'] ?? 30,
                 'appointment_type' => $data['appointment_type'] ?? 'consultation',
@@ -197,7 +206,7 @@ class AppointmentService
                 'booked_by' => $data['booked_by'] ?? null,
                 'booking_source' => $data['booking_source'] ?? 'web',
                 'reminder_preferences' => $data['reminder_preferences'] ?? null,
-                'status' => 'scheduled',
+                'status' => $data['status'] ?? 'scheduled',
             ]);
 
             // Schedule reminders

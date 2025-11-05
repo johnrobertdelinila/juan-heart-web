@@ -69,15 +69,16 @@ const navigationItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const pathname = usePathname();
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100">
       {/* Sidebar - Desktop */}
-      <aside className="sticky top-0 z-40 hidden h-screen w-72 border-r border-slate-200/80 bg-white/95 shadow-xl backdrop-blur-xl lg:block">
+      <aside className={`sticky top-0 z-40 hidden h-screen border-r border-slate-200/80 bg-white/95 shadow-xl backdrop-blur-xl lg:block transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-72'}`}>
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-20 items-center border-b border-slate-200/60 bg-gradient-to-br from-white via-slate-50 to-white px-6">
+          <div className="flex h-20 items-center justify-between border-b border-slate-200/60 bg-gradient-to-br from-white via-slate-50 to-white px-6">
             <Link
               href="/dashboard"
               className="group flex items-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -86,15 +87,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 transition-opacity group-hover:opacity-100" />
                 <span className="relative text-lg font-bold tracking-tight text-white">JH</span>
               </div>
-              <div>
-                <span className="block text-xl font-bold tracking-tight text-slate-900">
-                  Juan Heart
-                </span>
-                <span className="block text-[10px] font-semibold tracking-widest text-slate-500 uppercase">
-                  Clinical Platform
-                </span>
-              </div>
+              {!sidebarCollapsed && (
+                <div>
+                  <span className="block text-xl font-bold tracking-tight text-slate-900">
+                    Juan Heart
+                  </span>
+                  <span className="block text-[10px] font-semibold tracking-widest text-slate-500 uppercase">
+                    Clinical Platform
+                  </span>
+                </div>
+              )}
             </Link>
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <ChevronRight className={`h-5 w-5 transition-transform duration-300 ${sidebarCollapsed ? '' : 'rotate-180'}`} />
+            </button>
           </div>
 
           {/* Navigation */}
@@ -126,17 +136,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   )}
 
                   <Icon
-                    className={`relative z-20 h-5 w-5 transition-all duration-200 ${
+                    className={`relative z-20 h-5 w-5 transition-all duration-200 ${sidebarCollapsed ? 'mx-auto' : ''} ${
                       isActive
                         ? 'scale-110 text-white'
                         : 'group-hover:text-heart-red text-slate-500 group-hover:scale-110 group-hover:rotate-3'
                     }`}
                   />
-                  <span
-                    className={`relative z-20 flex-1 tracking-tight ${isActive ? 'font-bold' : ''}`}
-                  >
-                    {item.name}
-                  </span>
+                  {!sidebarCollapsed && (
+                    <span
+                      className={`relative z-20 flex-1 tracking-tight ${isActive ? 'font-bold' : ''}`}
+                    >
+                      {item.name}
+                    </span>
+                  )}
 
                   {/* Hover arrow */}
                   {!isActive && (
