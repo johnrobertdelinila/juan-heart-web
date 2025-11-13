@@ -18,6 +18,7 @@ import {
   Stethoscope,
   Hospital,
   ChevronRight,
+  Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +47,11 @@ const navigationItems = [
     icon: Hospital,
   },
   {
+    name: 'Appointments',
+    href: '/appointments',
+    icon: Calendar,
+  },
+  {
     name: 'Assessments',
     href: '/assessments',
     icon: FileText,
@@ -72,10 +78,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const pathname = usePathname();
 
+  // Debug: Log sidebar state
+  console.log('Sidebar collapsed:', sidebarCollapsed);
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100">
       {/* Sidebar - Desktop */}
-      <aside className={`sticky top-0 z-40 hidden h-screen border-r border-slate-200/80 bg-white/95 shadow-xl backdrop-blur-xl lg:block transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-72'}`}>
+      <aside
+        className={`sticky top-0 z-40 hidden h-screen border-r border-slate-200/80 bg-white/95 shadow-xl backdrop-blur-xl transition-all duration-300 lg:block ${sidebarCollapsed ? 'w-20' : 'w-72'}`}
+      >
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex h-20 items-center justify-between border-b border-slate-200/60 bg-gradient-to-br from-white via-slate-50 to-white px-6">
@@ -100,10 +111,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Link>
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+              className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
               aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              <ChevronRight className={`h-5 w-5 transition-transform duration-300 ${sidebarCollapsed ? '' : 'rotate-180'}`} />
+              <ChevronRight
+                className={`h-5 w-5 transition-transform duration-300 ${sidebarCollapsed ? '' : 'rotate-180'}`}
+                strokeWidth={1.5}
+                style={{ color: '#475569' }}
+              />
             </button>
           </div>
 
@@ -123,7 +138,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   }`}
                   style={
                     isActive
-                      ? { background: 'linear-gradient(to right, #DC2626, #DC2626, #B91C1C)' }
+                      ? { background: 'var(--gradient-primary)' }
                       : undefined
                   }
                 >
@@ -137,10 +152,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                   <Icon
                     className={`relative z-20 h-5 w-5 transition-all duration-200 ${sidebarCollapsed ? 'mx-auto' : ''} ${
-                      isActive
-                        ? 'scale-110 text-white'
-                        : 'group-hover:text-heart-red text-slate-500 group-hover:scale-110 group-hover:rotate-3'
+                      isActive ? 'scale-110' : 'group-hover:scale-110 group-hover:rotate-3'
                     }`}
+                    strokeWidth={1.5}
+                    style={
+                      isActive ? { color: '#ffffff' } : { color: '#334155', stroke: '#334155' }
+                    }
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.color = '#dc2626';
+                        e.currentTarget.style.stroke = '#dc2626';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.color = '#334155';
+                        e.currentTarget.style.stroke = '#334155';
+                      }
+                    }}
                   />
                   {!sidebarCollapsed && (
                     <span
@@ -151,8 +180,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   )}
 
                   {/* Hover arrow */}
-                  {!isActive && (
-                    <ChevronRight className="relative z-20 h-4 w-4 text-slate-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" />
+                  {!isActive && !sidebarCollapsed && (
+                    <ChevronRight
+                      className="relative z-20 h-4 w-4 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
+                      strokeWidth={1.5}
+                      style={{ color: '#94a3b8' }}
+                    />
                   )}
                   {isActive && (
                     <div className="relative z-20 h-2 w-2 rounded-full bg-white shadow-md" />
@@ -168,9 +201,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               href="/settings"
               className="group flex items-center gap-3.5 rounded-xl px-4 py-3.5 text-[13px] font-semibold text-slate-700 transition-all duration-200 hover:bg-gradient-to-r hover:from-slate-100 hover:to-slate-50 hover:text-slate-900 hover:shadow-md active:scale-[0.98]"
             >
-              <Settings className="group-hover:text-heart-red h-5 w-5 text-slate-500 transition-all group-hover:scale-110 group-hover:rotate-90" />
-              <span className="flex-1 tracking-tight">Settings</span>
-              <ChevronRight className="h-4 w-4 text-slate-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" />
+              <Settings
+                className={`h-5 w-5 transition-all group-hover:scale-110 group-hover:rotate-90 ${sidebarCollapsed ? 'mx-auto' : ''}`}
+                strokeWidth={1.5}
+                style={{ color: '#334155', stroke: '#334155' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = '#dc2626';
+                  e.currentTarget.style.stroke = '#dc2626';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = '#334155';
+                  e.currentTarget.style.stroke = '#334155';
+                }}
+              />
+              {!sidebarCollapsed && (
+                <>
+                  <span className="flex-1 tracking-tight">Settings</span>
+                  <ChevronRight className="h-4 w-4 text-slate-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" strokeWidth={1.5} />
+                </>
+              )}
             </Link>
           </div>
         </div>
@@ -206,7 +255,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   onClick={() => setSidebarOpen(false)}
                   className="hover:bg-slate-100"
                 >
-                  <X className="h-5 w-5 text-slate-500" />
+                  <X className="h-5 w-5 text-slate-500" strokeWidth={1.5} />
                 </Button>
               </div>
 
@@ -237,9 +286,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       <Icon
                         className={`relative z-20 h-5 w-5 transition-all ${
                           isActive
-                            ? 'scale-110 text-white'
-                            : 'group-hover:text-heart-red text-slate-500 group-hover:scale-110'
+                            ? 'scale-110 !text-white'
+                            : 'group-hover:text-heart-red !text-slate-700 group-hover:scale-110'
                         }`}
+                        strokeWidth={1.5}
                       />
                       <span
                         className={`relative z-20 flex-1 tracking-tight ${isActive ? 'font-bold' : ''}`}
@@ -258,7 +308,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   onClick={() => setSidebarOpen(false)}
                   className="group flex items-center gap-3.5 rounded-xl px-4 py-3.5 text-[13px] font-semibold text-slate-700 transition-all duration-200 hover:bg-gradient-to-r hover:from-slate-100 hover:to-slate-50 hover:text-slate-900 hover:shadow-md"
                 >
-                  <Settings className="group-hover:text-heart-red h-5 w-5 text-slate-500 transition-all group-hover:scale-110 group-hover:rotate-90" />
+                  <Settings
+                    className="group-hover:text-heart-red h-5 w-5 !text-slate-700 transition-all group-hover:scale-110 group-hover:rotate-90"
+                    strokeWidth={1.5}
+                  />
                   <span className="flex-1 tracking-tight">Settings</span>
                 </Link>
               </div>
@@ -279,7 +332,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className="hover:bg-slate-100 lg:hidden"
                 onClick={() => setSidebarOpen(true)}
               >
-                <Menu className="h-5 w-5 text-slate-600" />
+                <Menu className="h-5 w-5 text-slate-600" strokeWidth={1.5} />
               </Button>
               <div className="hidden sm:block">
                 <h1 className="text-base font-semibold tracking-tight text-slate-900">
@@ -296,7 +349,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 size="sm"
                 className="relative transition-colors hover:bg-slate-100"
               >
-                <Bell className="h-5 w-5 text-slate-600" />
+                <Bell className="h-5 w-5 text-slate-600" strokeWidth={1.5} />
                 <span className="bg-heart-red absolute top-2 right-2 h-2 w-2 animate-pulse rounded-full shadow-sm" />
               </Button>
 
@@ -309,7 +362,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     className="gap-2 transition-colors hover:bg-slate-100"
                   >
                     <div className="bg-gradient-primary flex h-8 w-8 items-center justify-center rounded-full shadow-sm">
-                      <User className="h-4 w-4 text-white" />
+                      <User className="h-4 w-4 text-white" strokeWidth={1.5} />
                     </div>
                     <span className="hidden text-sm font-medium text-slate-700 sm:inline">
                       Dr. Juan Dela Cruz
@@ -321,19 +374,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/profile" className="cursor-pointer transition-colors">
-                      <User className="mr-2 h-4 w-4 text-slate-500" />
+                      <User className="mr-2 h-4 w-4 text-slate-500" strokeWidth={1.5} />
                       <span className="text-sm">Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/settings" className="cursor-pointer transition-colors">
-                      <Settings className="mr-2 h-4 w-4 text-slate-500" />
+                      <Settings className="mr-2 h-4 w-4 text-slate-500" strokeWidth={1.5} />
                       <span className="text-sm">Settings</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-heart-red focus:text-heart-red cursor-pointer transition-colors">
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className="mr-2 h-4 w-4" strokeWidth={1.5} />
                     <span className="text-sm font-medium">Logout</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>

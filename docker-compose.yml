@@ -108,7 +108,7 @@ services:
     restart: unless-stopped
     working_dir: /app
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "${FRONTEND_PORT:-3003}:3003"
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -118,7 +118,7 @@ services:
     networks:
       - juan_heart_network
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8000}/api
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8000}/api/v1
       NEXT_PUBLIC_WS_URL: ws://localhost:6001
       NODE_ENV: development
     command: npm run dev

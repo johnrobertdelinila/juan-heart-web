@@ -17,6 +17,8 @@ use App\Http\Controllers\Api\Mobile\FacilityController as MobileFacilityControll
 use App\Http\Controllers\Api\Mobile\EducationalContentController as MobileEducationalContentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,8 +33,57 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Public routes
-Route::prefix('auth')->group(function () {
+// Health check endpoint - Monitor system and database connectivity
+Route::get('/health', function () {
+    $health = [
+        'status' => 'healthy',
+        'timestamp' => now()->toIso8601String(),
+        'services' => []
+    ];
+
+    // Check database connection
+    try {
+        DB::connection()->getPdo();
+        $health['services']['database'] = [
+            'status' => 'connected',
+            'connection' => DB::connection()->getName(),
+            'tables' => DB::select("SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = ?", [env('DB_DATABASE')])[0]->count ?? 0
+        ];
+    } catch (\Exception $e) {
+        $health['status'] = 'unhealthy';
+        $health['services']['database'] = [
+            'status' => 'disconnected',
+            'error' => $e->getMessage()
+        ];
+    }
+
+    // Check Redis connection (only if Redis is configured)
+    if (config('cache.default') === 'redis' && class_exists('Redis')) {
+        try {
+            Redis::ping();
+            $health['services']['redis'] = [
+                'status' => 'connected',
+                'ping' => 'pong'
+            ];
+        } catch (\Exception $e) {
+            $health['services']['redis'] = [
+                'status' => 'disconnected',
+                'error' => $e->getMessage()
+            ];
+        }
+    } else {
+        $health['services']['redis'] = [
+            'status' => 'skipped',
+            'message' => 'Redis not configured or extension not installed'
+        ];
+    }
+
+    // Return appropriate status code
+    return response()->json($health, $health['status'] === 'healthy' ? 200 : 503);
+});
+
+// Public routes with auth rate limiting
+Route::prefix('auth')->middleware('throttle:auth')->group(function () {
     Route::post('/register', [RegisteredUserController::class, 'store']);
     Route::post('/login', [LoginController::class, 'store']);
     Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail']);
@@ -40,16 +91,16 @@ Route::prefix('auth')->group(function () {
 });
 
 // Temporarily public routes for testing (will require auth in production)
-Route::prefix('analytics')->group(function () {
+Route::prefix('analytics')->middleware('throttle:public')->group(function () {
     Route::get('/national-overview', [AnalyticsController::class, 'getNationalOverview']);
     Route::get('/real-time-metrics', [AnalyticsController::class, 'getRealTimeMetrics']);
     Route::get('/geographic-distribution', [AnalyticsController::class, 'getGeographicDistribution']);
     Route::get('/trend-analysis', [AnalyticsController::class, 'getTrendAnalysis']);
     Route::get('/demographics-analysis', [AnalyticsController::class, 'getDemographicsAnalysis']);
-    Route::post('/export', [AnalyticsController::class, 'exportData']);
+    Route::post('/export', [AnalyticsController::class, 'exportData'])->middleware('throttle:export');
 });
 
-Route::prefix('clinical')->group(function () {
+Route::prefix('clinical')->middleware('throttle:public')->group(function () {
     Route::get('/dashboard', [ClinicalDashboardController::class, 'dashboard']);
     Route::get('/assessment-queue', [ClinicalDashboardController::class, 'assessmentQueue']);
     Route::get('/risk-stratification', [ClinicalDashboardController::class, 'riskStratification']);
@@ -59,7 +110,7 @@ Route::prefix('clinical')->group(function () {
     Route::get('/treatment-outcomes', [ClinicalDashboardController::class, 'treatmentOutcomes']);
 });
 
-Route::prefix('facilities')->group(function () {
+Route::prefix('facilities')->middleware('throttle:public')->group(function () {
     Route::get('/{id}/dashboard', [FacilityAnalyticsController::class, 'dashboard']);
     Route::get('/{id}/summary', [FacilityAnalyticsController::class, 'summary']);
     Route::get('/{id}/patient-flow', [FacilityAnalyticsController::class, 'patientFlow']);
@@ -71,7 +122,7 @@ Route::prefix('facilities')->group(function () {
 });
 
 // Temporarily public referral routes for testing (will require auth in production)
-Route::prefix('referrals')->group(function () {
+Route::prefix('referrals')->middleware('throttle:public')->group(function () {
     Route::get('/statistics', [ReferralController::class, 'statistics']);
     Route::get('/', [ReferralController::class, 'index']);
     Route::get('/{id}', [ReferralController::class, 'show']);
@@ -85,30 +136,74 @@ Route::prefix('referrals')->group(function () {
 });
 
 // Temporarily public assessment routes for testing (will require auth in production)
-Route::prefix('assessments')->group(function () {
+Route::prefix('assessments')->middleware('throttle:public')->group(function () {
     Route::get('/statistics', [AssessmentController::class, 'statistics']);
+    Route::post('/bulk', [AssessmentController::class, 'bulkStore'])->middleware('throttle:bulk'); // Bulk upload for offline sync
     Route::get('/', [AssessmentController::class, 'index']);
     Route::post('/', [AssessmentController::class, 'store']); // Mobile app endpoint
     Route::get('/{id}', [AssessmentController::class, 'show']);
+    Route::put('/{id}', [AssessmentController::class, 'update']); // Update with conflict resolution
     Route::post('/{id}/validate', [AssessmentController::class, 'validate']);
-    Route::post('/export', [AssessmentController::class, 'export']);
+    Route::post('/{id}/reject', [AssessmentController::class, 'reject']);
+    Route::get('/{id}/notes', [AssessmentController::class, 'clinicalNotes']);
+    Route::post('/{id}/notes', [AssessmentController::class, 'storeClinicalNote']);
+    Route::get('/{id}/risk-adjustments', [AssessmentController::class, 'riskAdjustments']);
+    Route::post('/{id}/risk-adjustments', [AssessmentController::class, 'adjustRiskScore']);
+    Route::post('/export', [AssessmentController::class, 'export'])->middleware('throttle:export');
 });
 
 // Temporarily public patient routes for testing (will require auth in production)
-Route::prefix('patients')->group(function () {
+Route::prefix('patients')->middleware('throttle:public')->group(function () {
     Route::get('/statistics', [PatientController::class, 'statistics']);
     Route::get('/', [PatientController::class, 'index']);
     Route::get('/{id}', [PatientController::class, 'show']);
 });
 
-// Public appointments route for mobile app (no authentication required)
-Route::prefix('appointments')->group(function () {
+// TEMPORARY: Public appointment routes for testing (will require auth in production)
+// TODO: Move back to protected routes once authentication is implemented
+Route::prefix('appointments')->middleware('throttle:public')->group(function () {
+    // List appointments with filters
+    Route::get('/', [AppointmentController::class, 'index']);
+
+    // Get appointment statistics
+    Route::get('/statistics', [AppointmentController::class, 'statistics']);
+
+    // Get single appointment
+    Route::get('/{id}', [AppointmentController::class, 'show']);
+
     // Mobile app booking endpoint (public)
     Route::post('/', [AppointmentController::class, 'store']);
+
+    // Confirm appointment
+    Route::post('/{id}/confirm', [AppointmentController::class, 'confirm']);
+
+    // Cancel appointment
+    Route::post('/{id}/cancel', [AppointmentController::class, 'cancel']);
+
+    // Check in patient
+    Route::post('/{id}/check-in', [AppointmentController::class, 'checkIn']);
+
+    // Reschedule appointment
+    Route::post('/{id}/reschedule', [AppointmentController::class, 'reschedule']);
+
+    // Complete appointment
+    Route::post('/{id}/complete', [AppointmentController::class, 'complete']);
+
+    // Public confirmation endpoint (token-based, no auth)
+    Route::post('/confirm-public', [AppointmentController::class, 'confirmPublic']);
+});
+
+// Mobile-specific appointment routes (public for testing, will require auth later)
+Route::prefix('mobile/appointments')->middleware('throttle:mobile')->group(function () {
+    // Get appointments for mobile user
+    Route::get('/', [App\Http\Controllers\Api\Mobile\MobileAppointmentController::class, 'index']);
+
+    // Get appointment statistics
+    Route::get('/stats', [App\Http\Controllers\Api\Mobile\MobileAppointmentController::class, 'statistics']);
 });
 
 // Mobile-specific facility routes (public for testing, will require auth later)
-Route::prefix('mobile/facilities')->group(function () {
+Route::prefix('mobile/facilities')->middleware('throttle:mobile')->group(function () {
     // Get all active facilities
     Route::get('/', [MobileFacilityController::class, 'index']);
 
@@ -132,7 +227,7 @@ Route::prefix('mobile/facilities')->group(function () {
 });
 
 // Mobile-specific educational content routes (public for testing, will require auth later)
-Route::prefix('mobile/educational-content')->group(function () {
+Route::prefix('mobile/educational-content')->middleware('throttle:mobile')->group(function () {
     // Get all published educational content
     Route::get('/', [MobileEducationalContentController::class, 'index']);
 
@@ -287,51 +382,51 @@ Route::middleware('auth:sanctum')->group(function () {
     //     })->middleware('permission:override-ml-scores');
     // });
 
-    // Appointments
-    Route::prefix('appointments')->group(function () {
-        // Check availability
-        Route::post('/check-availability', [AppointmentController::class, 'checkAvailability']);
-
-        // Get available slots
-        Route::get('/available-slots', [AppointmentController::class, 'getAvailableSlots']);
-
-        // View appointments (all medical staff can view)
-        Route::get('/', [AppointmentController::class, 'index'])
-            ->middleware('permission:view-appointments');
-
-        // View single appointment
-        Route::get('/{id}', [AppointmentController::class, 'show'])
-            ->middleware('permission:view-appointments');
-
-        // Book appointment (nurses, doctors, cardiologists, admins)
-        // COMMENTED OUT: Now using public route for mobile app bookings (see line 105)
-        // Route::post('/', [AppointmentController::class, 'store'])
-        //     ->middleware('permission:create-appointments');
-
-        // Reschedule appointment
-        Route::post('/{id}/reschedule', [AppointmentController::class, 'reschedule'])
-            ->middleware('permission:edit-appointments');
-
-        // Cancel appointment
-        Route::post('/{id}/cancel', [AppointmentController::class, 'cancel'])
-            ->middleware('permission:cancel-appointments');
-
-        // Confirm appointment
-        Route::post('/{id}/confirm', [AppointmentController::class, 'confirm'])
-            ->middleware('permission:confirm-appointments');
-
-        // Check in patient
-        Route::post('/{id}/check-in', [AppointmentController::class, 'checkIn'])
-            ->middleware('permission:check-in-patients');
-
-        // Complete appointment
-        Route::post('/{id}/complete', [AppointmentController::class, 'complete'])
-            ->middleware('permission:complete-appointments');
-
-        // Add to waiting list
-        Route::post('/waiting-list', [AppointmentController::class, 'addToWaitingList'])
-            ->middleware('permission:manage-waiting-list');
-    });
+    // Appointments - Protected routes (commented out for testing, using public routes above)
+    // TODO: Uncomment these when authentication is implemented and remove public routes
+    // Route::prefix('appointments')->group(function () {
+    //     // Check availability
+    //     Route::post('/check-availability', [AppointmentController::class, 'checkAvailability']);
+    //
+    //     // Get available slots
+    //     Route::get('/available-slots', [AppointmentController::class, 'getAvailableSlots']);
+    //
+    //     // View appointments (all medical staff can view)
+    //     Route::get('/', [AppointmentController::class, 'index'])
+    //         ->middleware('permission:view-appointments');
+    //
+    //     // View single appointment
+    //     Route::get('/{id}', [AppointmentController::class, 'show'])
+    //         ->middleware('permission:view-appointments');
+    //
+    //     // Book appointment (nurses, doctors, cardiologists, admins)
+    //     Route::post('/', [AppointmentController::class, 'store'])
+    //         ->middleware('permission:create-appointments');
+    //
+    //     // Reschedule appointment
+    //     Route::post('/{id}/reschedule', [AppointmentController::class, 'reschedule'])
+    //         ->middleware('permission:edit-appointments');
+    //
+    //     // Cancel appointment
+    //     Route::post('/{id}/cancel', [AppointmentController::class, 'cancel'])
+    //         ->middleware('permission:cancel-appointments');
+    //
+    //     // Confirm appointment
+    //     Route::post('/{id}/confirm', [AppointmentController::class, 'confirm'])
+    //         ->middleware('permission:confirm-appointments');
+    //
+    //     // Check in patient
+    //     Route::post('/{id}/check-in', [AppointmentController::class, 'checkIn'])
+    //         ->middleware('permission:check-in-patients');
+    //
+    //     // Complete appointment
+    //     Route::post('/{id}/complete', [AppointmentController::class, 'complete'])
+    //         ->middleware('permission:complete-appointments');
+    //
+    //     // Add to waiting list
+    //     Route::post('/waiting-list', [AppointmentController::class, 'addToWaitingList'])
+    //         ->middleware('permission:manage-waiting-list');
+    // });
 
     // Patients (Protected - TODO: uncomment when authentication is fully implemented)
     // Route::prefix('patients')->group(function () {

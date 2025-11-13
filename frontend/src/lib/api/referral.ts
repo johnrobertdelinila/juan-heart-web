@@ -16,6 +16,7 @@ import type {
   StatisticsResponse,
   ApiError,
 } from '@/types/referral';
+import { handleApiRequest, logApiError } from './api-error-handler';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001/api/v1';
 
@@ -43,23 +44,15 @@ export async function getReferrals(
 ): Promise<ReferralsResponse | ApiError> {
   try {
     const queryString = filters ? buildQueryString(filters) : '';
-    const response = await fetch(`${API_BASE_URL}/referrals${queryString}`, {
+    return await handleApiRequest<ReferralsResponse>(`${API_BASE_URL}/referrals${queryString}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch referrals');
-    }
-
-    return data;
   } catch (error) {
-    console.error('Error fetching referrals:', error);
+    logApiError(error as any, 'getReferrals');
     throw error;
   }
 }
@@ -75,23 +68,18 @@ export async function getReferralStatistics(filters?: {
 }): Promise<StatisticsResponse | ApiError> {
   try {
     const queryString = filters ? buildQueryString(filters) : '';
-    const response = await fetch(`${API_BASE_URL}/referrals/statistics${queryString}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch statistics');
-    }
-
-    return data;
+    return await handleApiRequest<StatisticsResponse>(
+      `${API_BASE_URL}/referrals/statistics${queryString}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
   } catch (error) {
-    console.error('Error fetching referral statistics:', error);
+    logApiError(error as any, 'getReferralStatistics');
     throw error;
   }
 }
@@ -101,23 +89,15 @@ export async function getReferralStatistics(filters?: {
  */
 export async function getReferralById(id: number): Promise<ReferralResponse | ApiError> {
   try {
-    const response = await fetch(`${API_BASE_URL}/referrals/${id}`, {
+    return await handleApiRequest<ReferralResponse>(`${API_BASE_URL}/referrals/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch referral');
-    }
-
-    return data;
   } catch (error) {
-    console.error(`Error fetching referral ${id}:`, error);
+    logApiError(error as any, `getReferralById(${id})`);
     throw error;
   }
 }
@@ -129,7 +109,7 @@ export async function createReferral(
   request: CreateReferralRequest
 ): Promise<ReferralResponse | ApiError> {
   try {
-    const response = await fetch(`${API_BASE_URL}/referrals`, {
+    return await handleApiRequest<ReferralResponse>(`${API_BASE_URL}/referrals`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -137,16 +117,8 @@ export async function createReferral(
       credentials: 'include',
       body: JSON.stringify(request),
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to create referral');
-    }
-
-    return data;
   } catch (error) {
-    console.error('Error creating referral:', error);
+    logApiError(error as any, 'createReferral');
     throw error;
   }
 }
@@ -159,7 +131,7 @@ export async function acceptReferral(
   request: AcceptReferralRequest
 ): Promise<ReferralResponse | ApiError> {
   try {
-    const response = await fetch(`${API_BASE_URL}/referrals/${id}/accept`, {
+    return await handleApiRequest<ReferralResponse>(`${API_BASE_URL}/referrals/${id}/accept`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -167,16 +139,8 @@ export async function acceptReferral(
       credentials: 'include',
       body: JSON.stringify(request),
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to accept referral');
-    }
-
-    return data;
   } catch (error) {
-    console.error(`Error accepting referral ${id}:`, error);
+    logApiError(error as any, `acceptReferral(${id})`);
     throw error;
   }
 }
@@ -189,7 +153,7 @@ export async function rejectReferral(
   request: RejectReferralRequest
 ): Promise<ReferralResponse | ApiError> {
   try {
-    const response = await fetch(`${API_BASE_URL}/referrals/${id}/reject`, {
+    return await handleApiRequest<ReferralResponse>(`${API_BASE_URL}/referrals/${id}/reject`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -197,16 +161,8 @@ export async function rejectReferral(
       credentials: 'include',
       body: JSON.stringify(request),
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to reject referral');
-    }
-
-    return data;
   } catch (error) {
-    console.error(`Error rejecting referral ${id}:`, error);
+    logApiError(error as any, `rejectReferral(${id})`);
     throw error;
   }
 }
@@ -219,7 +175,7 @@ export async function updateReferralStatus(
   request: UpdateStatusRequest
 ): Promise<ReferralResponse | ApiError> {
   try {
-    const response = await fetch(`${API_BASE_URL}/referrals/${id}/status`, {
+    return await handleApiRequest<ReferralResponse>(`${API_BASE_URL}/referrals/${id}/status`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -227,16 +183,8 @@ export async function updateReferralStatus(
       credentials: 'include',
       body: JSON.stringify(request),
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to update status');
-    }
-
-    return data;
   } catch (error) {
-    console.error(`Error updating referral ${id} status:`, error);
+    logApiError(error as any, `updateReferralStatus(${id})`);
     throw error;
   }
 }
@@ -249,7 +197,7 @@ export async function scheduleAppointment(
   request: ScheduleAppointmentRequest
 ): Promise<ReferralResponse | ApiError> {
   try {
-    const response = await fetch(`${API_BASE_URL}/referrals/${id}/schedule`, {
+    return await handleApiRequest<ReferralResponse>(`${API_BASE_URL}/referrals/${id}/schedule`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -257,16 +205,8 @@ export async function scheduleAppointment(
       credentials: 'include',
       body: JSON.stringify(request),
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to schedule appointment');
-    }
-
-    return data;
   } catch (error) {
-    console.error(`Error scheduling appointment for referral ${id}:`, error);
+    logApiError(error as any, `scheduleAppointment(${id})`);
     throw error;
   }
 }
@@ -279,7 +219,7 @@ export async function completeReferral(
   request: CompleteReferralRequest
 ): Promise<ReferralResponse | ApiError> {
   try {
-    const response = await fetch(`${API_BASE_URL}/referrals/${id}/complete`, {
+    return await handleApiRequest<ReferralResponse>(`${API_BASE_URL}/referrals/${id}/complete`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -287,16 +227,8 @@ export async function completeReferral(
       credentials: 'include',
       body: JSON.stringify(request),
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to complete referral');
-    }
-
-    return data;
   } catch (error) {
-    console.error(`Error completing referral ${id}:`, error);
+    logApiError(error as any, `completeReferral(${id})`);
     throw error;
   }
 }
@@ -309,7 +241,7 @@ export async function escalateReferral(
   request: EscalateReferralRequest
 ): Promise<ReferralResponse | ApiError> {
   try {
-    const response = await fetch(`${API_BASE_URL}/referrals/${id}/escalate`, {
+    return await handleApiRequest<ReferralResponse>(`${API_BASE_URL}/referrals/${id}/escalate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -317,57 +249,49 @@ export async function escalateReferral(
       credentials: 'include',
       body: JSON.stringify(request),
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to escalate referral');
-    }
-
-    return data;
   } catch (error) {
-    console.error(`Error escalating referral ${id}:`, error);
+    logApiError(error as any, `escalateReferral(${id})`);
     throw error;
   }
 }
 
 /**
- * Helper: Get priority color class
+ * Helper: Get priority color class (Juan Heart Design System)
  */
 export function getPriorityColor(priority: string): string {
   switch (priority) {
     case 'Critical':
-      return 'text-red-700 bg-red-50 border-red-200';
+      return 'text-red-700 bg-red-50/50 border-red-200/60'; // --danger
     case 'High':
-      return 'text-orange-700 bg-orange-50 border-orange-200';
+      return 'text-orange-700 bg-orange-50/50 border-orange-200/60'; // --warning
     case 'Medium':
-      return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+      return 'text-yellow-700 bg-yellow-50/50 border-yellow-200/60';
     case 'Low':
-      return 'text-green-700 bg-green-50 border-green-200';
+      return 'text-green-700 bg-green-50/50 border-green-200/60'; // --success
     default:
       return 'text-gray-700 bg-gray-50 border-gray-200';
   }
 }
 
 /**
- * Helper: Get status color class
+ * Helper: Get status color class (Juan Heart Design System)
  */
 export function getStatusColor(status: string): string {
   switch (status) {
     case 'pending':
-      return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+      return 'text-yellow-700 bg-yellow-50/50 border-yellow-200/60'; // --warning context
     case 'accepted':
-      return 'text-blue-700 bg-blue-50 border-blue-200';
+      return 'text-blue-700 bg-blue-50/50 border-blue-200/60'; // --info
     case 'in_transit':
-      return 'text-purple-700 bg-purple-50 border-purple-200';
+      return 'text-purple-700 bg-purple-50/50 border-purple-200/60';
     case 'arrived':
-      return 'text-indigo-700 bg-indigo-50 border-indigo-200';
+      return 'text-indigo-700 bg-indigo-50/50 border-indigo-200/60';
     case 'in_progress':
-      return 'text-cyan-700 bg-cyan-50 border-cyan-200';
+      return 'text-cyan-700 bg-cyan-50/50 border-cyan-200/60'; // --info variant
     case 'completed':
-      return 'text-green-700 bg-green-50 border-green-200';
+      return 'text-green-700 bg-green-50/50 border-green-200/60'; // --success
     case 'rejected':
-      return 'text-red-700 bg-red-50 border-red-200';
+      return 'text-red-700 bg-red-50/50 border-red-200/60'; // --danger
     case 'cancelled':
       return 'text-gray-700 bg-gray-50 border-gray-200';
     default:
@@ -376,16 +300,16 @@ export function getStatusColor(status: string): string {
 }
 
 /**
- * Helper: Get urgency color class
+ * Helper: Get urgency color class (Juan Heart Design System)
  */
 export function getUrgencyColor(urgency: string): string {
   switch (urgency) {
     case 'Emergency':
-      return 'text-red-700 bg-red-50 border-red-200';
+      return 'text-red-700 bg-red-50/50 border-red-200/60'; // --danger
     case 'Urgent':
-      return 'text-orange-700 bg-orange-50 border-orange-200';
+      return 'text-orange-700 bg-orange-50/50 border-orange-200/60'; // --warning
     case 'Routine':
-      return 'text-blue-700 bg-blue-50 border-blue-200';
+      return 'text-blue-700 bg-blue-50/50 border-blue-200/60'; // --info
     default:
       return 'text-gray-700 bg-gray-50 border-gray-200';
   }

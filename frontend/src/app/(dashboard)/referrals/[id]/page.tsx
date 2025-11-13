@@ -212,7 +212,7 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
             <p className="font-medium text-red-600">{error || 'Referral not found'}</p>
             <Link href="/referrals">
               <Button className="mt-4">
-                <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className="mr-2 h-4 w-4 text-white" />
                 Back to Referrals
               </Button>
             </Link>
@@ -232,11 +232,11 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
         <div className="flex items-center gap-4">
           <Link href="/referrals">
             <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-5 w-5 text-gray-700" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Referral Review</h1>
+            <h1 className="text-3xl font-semibold text-gray-900">Referral Review</h1>
             <p className="mt-1 text-gray-600">Review and validate patient referral</p>
           </div>
         </div>
@@ -248,14 +248,14 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
               className="border-red-600 text-red-600 hover:bg-red-50"
               onClick={() => setRejectDialogOpen(true)}
             >
-              <XCircle className="mr-2 h-4 w-4" />
+              <XCircle className="mr-2 h-4 w-4 text-red-600" />
               Reject
             </Button>
             <Button
               className="bg-green-600 hover:bg-green-700"
               onClick={() => setAcceptDialogOpen(true)}
             >
-              <CheckCircle className="mr-2 h-4 w-4" />
+              <CheckCircle className="mr-2 h-4 w-4 text-white" />
               Accept Referral
             </Button>
           </div>
@@ -289,10 +289,10 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           {/* Patient Information */}
-          <Card>
+          <Card index={0}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+                <User className="h-5 w-5" strokeWidth={1.5} />
                 Patient Information
               </CardTitle>
             </CardHeader>
@@ -333,10 +333,10 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
 
           {/* Facilities Information */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Card>
+            <Card index={1}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
+                  <MapPin className="h-5 w-5" strokeWidth={1.5} />
                   From Facility
                 </CardTitle>
               </CardHeader>
@@ -374,10 +374,10 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
               </CardContent>
             </Card>
 
-            <Card>
+            <Card index={2}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MapPin className="text-heart-red h-5 w-5" />
+                  <MapPin className="text-heart-red h-5 w-5" strokeWidth={1.5} />
                   To Facility
                 </CardTitle>
               </CardHeader>
@@ -413,10 +413,10 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
           </div>
 
           {/* Clinical Information */}
-          <Card>
+          <Card index={3}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Clipboard className="h-5 w-5" />
+                <Clipboard className="h-5 w-5" strokeWidth={1.5} />
                 Clinical Information
               </CardTitle>
             </CardHeader>
@@ -451,10 +451,10 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
           </Card>
 
           {/* Timeline */}
-          <Card>
+          <Card index={4}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
+                <Clock className="h-5 w-5" strokeWidth={1.5} />
                 Timeline
               </CardTitle>
             </CardHeader>
@@ -514,11 +514,11 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
                     <div className="flex items-center justify-between">
                       <div>
                         <Label className="text-gray-500">ML Risk Score</Label>
-                        <p className="text-4xl font-bold text-gray-900">{mlScore}</p>
+                        <p className="text-4xl font-semibold text-gray-900">{mlScore}</p>
                       </div>
                       <div className="text-right">
                         <Label className="text-gray-500">Risk Level</Label>
-                        <p className="text-heart-red text-2xl font-bold">{riskLevel}</p>
+                        <p className="text-heart-red text-2xl font-semibold">{riskLevel}</p>
                       </div>
                     </div>
                   </div>
@@ -566,11 +566,11 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
                   className="bg-heart-red hover:bg-heart-red-dark"
                   onClick={() => setValidationDialogOpen(true)}
                 >
-                  <Clipboard className="mr-2 h-4 w-4" />
+                  <Clipboard className="mr-2 h-4 w-4 text-white" />
                   Submit Validation
                 </Button>
                 <Button variant="outline" onClick={() => setSecondOpinionDialogOpen(true)}>
-                  <MessageSquare className="mr-2 h-4 w-4" />
+                  <MessageSquare className="mr-2 h-4 w-4 text-gray-700" />
                   Request Second Opinion
                 </Button>
               </div>
@@ -602,7 +602,7 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
                   <div className="space-y-4">
                     <div className="rounded-lg bg-blue-50 p-4">
                       <Label className="text-sm text-blue-700">Calculated Risk Score</Label>
-                      <p className="mt-1 text-3xl font-bold text-blue-900">{mlScore}</p>
+                      <p className="mt-1 text-3xl font-semibold text-blue-900">{mlScore}</p>
                     </div>
 
                     <div>
@@ -667,7 +667,7 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
                         placeholder="Enter score (0-100)"
                         value={validationScore}
                         onChange={(e) => setValidationScore(e.target.value)}
-                        className="mt-2 text-center text-3xl font-bold"
+                        className="mt-2 text-center text-3xl font-semibold"
                       />
                     </div>
 
@@ -679,7 +679,7 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
                           size="sm"
                           className="flex-1 border-green-500 text-green-700 hover:bg-green-50"
                         >
-                          <ThumbsUp className="mr-1 h-4 w-4" />
+                          <ThumbsUp className="mr-1 h-4 w-4 text-green-700" />
                           Agree
                         </Button>
                         <Button
@@ -694,7 +694,7 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
                           size="sm"
                           className="flex-1 border-red-500 text-red-700 hover:bg-red-50"
                         >
-                          <ThumbsDown className="mr-1 h-4 w-4" />
+                          <ThumbsDown className="mr-1 h-4 w-4 text-red-700" />
                           Disagree
                         </Button>
                       </div>
@@ -733,7 +733,7 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
                         className="flex-1 bg-green-600 hover:bg-green-700"
                         onClick={handleSubmitValidation}
                       >
-                        <CheckCircle className="mr-2 h-4 w-4" />
+                        <CheckCircle className="mr-2 h-4 w-4 text-white" />
                         Submit Validation
                       </Button>
                     </div>
@@ -915,7 +915,7 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
               Cancel
             </Button>
             <Button className="bg-green-600 hover:bg-green-700" onClick={handleAcceptReferral}>
-              <CheckCircle className="mr-2 h-4 w-4" />
+              <CheckCircle className="mr-2 h-4 w-4 text-white" />
               Accept Referral
             </Button>
           </DialogFooter>
@@ -955,7 +955,7 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
               onClick={handleRejectReferral}
               disabled={!rejectReason.trim()}
             >
-              <XCircle className="mr-2 h-4 w-4" />
+              <XCircle className="mr-2 h-4 w-4 text-white" />
               Reject Referral
             </Button>
           </DialogFooter>
@@ -1022,7 +1022,7 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
               onClick={handleSubmitValidation}
               disabled={!validationScore || !clinicalNotes.trim()}
             >
-              <Send className="mr-2 h-4 w-4" />
+              <Send className="mr-2 h-4 w-4 text-white" />
               Submit Validation
             </Button>
           </DialogFooter>
@@ -1060,7 +1060,7 @@ export default function ReferralDetailPage({ params }: ReferralDetailPageProps) 
               onClick={handleRequestSecondOpinion}
               disabled={!secondOpinionReason.trim()}
             >
-              <MessageSquare className="mr-2 h-4 w-4" />
+              <MessageSquare className="mr-2 h-4 w-4 text-white" />
               Send Request
             </Button>
           </DialogFooter>

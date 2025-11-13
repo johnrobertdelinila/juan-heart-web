@@ -24,6 +24,7 @@ class AssessmentAttachment extends Model
      */
     protected $fillable = [
         'assessment_id',
+        'comment_id',
         'uploaded_by',
         'file_name',
         'file_path',
@@ -57,6 +58,14 @@ class AssessmentAttachment extends Model
     public function assessment()
     {
         return $this->belongsTo(Assessment::class);
+    }
+
+    /**
+     * Get the clinical note/comment associated with this attachment.
+     */
+    public function comment()
+    {
+        return $this->belongsTo(AssessmentComment::class, 'comment_id');
     }
 
     /**

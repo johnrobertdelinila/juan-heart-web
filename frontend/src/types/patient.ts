@@ -49,6 +49,26 @@ export interface Assessment {
   validated_at?: string;
   validated_by?: number;
   validation_notes?: string;
+  patient_first_name?: string;
+  patient_last_name?: string;
+  patient_email?: string;
+  patient_phone?: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  medical_history?: Record<string, unknown>;
+  lifestyle?: Record<string, unknown>;
+  vital_signs?: {
+    blood_pressure_systolic?: number;
+    blood_pressure_diastolic?: number;
+    heart_rate?: number;
+    oxygen_saturation?: number;
+    temperature?: number;
+    bmi?: number;
+  };
+  symptoms?: Record<string, unknown>;
+  recommended_action?: string;
+  urgency?: string;
 }
 
 export interface PatientListParams {

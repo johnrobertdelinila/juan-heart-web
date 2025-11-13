@@ -41,6 +41,14 @@ class AppointmentController extends Controller
                 $query->where('status', $request->status);
             }
 
+            if ($request->has('booking_source')) {
+                $query->where('booking_source', $request->booking_source);
+            }
+
+            if ($request->has('appointment_type')) {
+                $query->where('appointment_type', $request->appointment_type);
+            }
+
             if ($request->has('date_from') && $request->has('date_to')) {
                 $query->betweenDates(
                     Carbon::parse($request->date_from),
@@ -48,12 +56,63 @@ class AppointmentController extends Controller
                 );
             }
 
-            if ($request->has('search')) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('patient_first_name', 'like', "%{$search}%")
-                      ->orWhere('patient_last_name', 'like', "%{$search}%")
-                      ->orWhere('patient_phone', 'like', "%{$search}%");
+            if ($request->has('search') && !empty($request->search)) {
+                $search = trim($request->search);
+
+                // Split search term into individual words for better matching
+                $searchTerms = array_filter(explode(' ', $search));
+
+                $query->where(function ($q) use ($search, $searchTerms) {
+                    // First priority: Match full phrase in concatenated name
+                    $q->whereRaw("CONCAT(IFNULL(patient_first_name, ''), ' ', IFNULL(patient_last_name, '')) LIKE ?", ["%{$search}%"])
+                      ->orWhereRaw("CONCAT(IFNULL(patient_last_name, ''), ' ', IFNULL(patient_first_name, '')) LIKE ?", ["%{$search}%"]);
+
+                    // Second priority: Match in single fields
+                    $q->orWhere('patient_email', 'like', "%{$search}%")
+                      ->orWhere('patient_phone', 'like', "%{$search}%")
+                      ->orWhere('appointment_type', 'like', "%{$search}%")
+                      ->orWhere('status', 'like', "%{$search}%")
+                      ->orWhere('booking_source', 'like', "%{$search}%")
+                      ->orWhere('reason_for_visit', 'like', "%{$search}%")
+                      // Search in formatted date/time
+                      ->orWhereRaw("DATE_FORMAT(appointment_datetime, '%Y-%m-%d') LIKE ?", ["%{$search}%"])
+                      ->orWhereRaw("DATE_FORMAT(appointment_datetime, '%M %d, %Y') LIKE ?", ["%{$search}%"])
+                      ->orWhereRaw("DATE_FORMAT(appointment_datetime, '%W, %M %d') LIKE ?", ["%{$search}%"])
+                      ->orWhereRaw("DATE_FORMAT(appointment_datetime, '%h:%i %p') LIKE ?", ["%{$search}%"]);
+
+                    // Search in facility name
+                    $q->orWhereHas('facility', function ($fq) use ($search) {
+                        $fq->where('name', 'like', "%{$search}%")
+                           ->orWhere('city', 'like', "%{$search}%");
+                    });
+
+                    // If multiple words, also check if ALL words appear in the appointment
+                    if (count($searchTerms) > 1) {
+                        $q->orWhere(function ($subQuery) use ($searchTerms) {
+                            foreach ($searchTerms as $term) {
+                                $subQuery->where(function ($termQuery) use ($term) {
+                                    $termQuery->where('patient_first_name', 'like', "%{$term}%")
+                                              ->orWhere('patient_last_name', 'like', "%{$term}%")
+                                              ->orWhere('patient_email', 'like', "%{$term}%")
+                                              ->orWhere('patient_phone', 'like', "%{$term}%")
+                                              ->orWhere('appointment_type', 'like', "%{$term}%")
+                                              ->orWhere('status', 'like', "%{$term}%")
+                                              ->orWhere('booking_source', 'like', "%{$term}%")
+                                              ->orWhere('reason_for_visit', 'like', "%{$term}%")
+                                              ->orWhereHas('facility', function ($fq) use ($term) {
+                                                  $fq->where('name', 'like', "%{$term}%")
+                                                     ->orWhere('city', 'like', "%{$term}%");
+                                              });
+                                });
+                            }
+                        });
+                    }
+                    // For single word searches, be more flexible
+                    else if (count($searchTerms) == 1) {
+                        $term = $searchTerms[0];
+                        $q->orWhere('patient_first_name', 'like', "%{$term}%")
+                          ->orWhere('patient_last_name', 'like', "%{$term}%");
+                    }
                 });
             }
 
@@ -77,6 +136,49 @@ class AppointmentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch appointments',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get appointment statistics.
+     */
+    public function statistics(Request $request): JsonResponse
+    {
+        try {
+            // Get date range for today
+            $today = now()->startOfDay();
+            $tomorrow = now()->endOfDay();
+
+            // Get counts
+            $totalToday = Appointment::whereBetween('appointment_datetime', [$today, $tomorrow])->count();
+            $confirmed = Appointment::where('status', 'confirmed')
+                ->whereBetween('appointment_datetime', [$today, $tomorrow])
+                ->count();
+            $pending = Appointment::whereIn('status', ['scheduled', 'rescheduled'])
+                ->whereBetween('appointment_datetime', [$today, $tomorrow])
+                ->count();
+            $completed = Appointment::where('status', 'completed')
+                ->whereBetween('appointment_datetime', [$today, $tomorrow])
+                ->count();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_today' => $totalToday,
+                    'confirmed' => $confirmed,
+                    'pending' => $pending,
+                    'completed' => $completed,
+                ],
+                'timestamp' => now()->toISOString(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching appointment statistics', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch appointment statistics',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -360,10 +462,22 @@ class AppointmentController extends Controller
 
             $appointment = $this->appointmentService->bookAppointment($data);
 
+            // Generate confirmation token for email/SMS confirmation
+            $confirmationToken = bin2hex(random_bytes(32)); // 64 character hex string
+            $tokenExpiresAt = now()->addHours(24); // Token expires in 24 hours
+
+            $appointment->update([
+                'confirmation_token' => $confirmationToken,
+                'token_expires_at' => $tokenExpiresAt,
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Appointment booked successfully',
                 'data' => $appointment->load(['facility', 'doctor', 'assessment']),
+                'confirmation_token' => $confirmationToken,
+                'confirmation_url' => config('app.url') . '/api/v1/appointments/confirm-public?token=' . $confirmationToken,
+                'token_expires_at' => $tokenExpiresAt,
                 'timestamp' => now()->toISOString(),
             ], 201);
         } catch (\Exception $e) {
@@ -445,9 +559,10 @@ class AppointmentController extends Controller
 
         try {
             $appointment = Appointment::findOrFail($id);
+            // TEMPORARY: Default to admin user (ID 1) when no auth
             $this->appointmentService->cancelAppointment(
                 $appointment,
-                auth()->id(),
+                auth()->id() ?? 1,
                 $request->reason
             );
 
@@ -499,7 +614,8 @@ class AppointmentController extends Controller
     {
         try {
             $appointment = Appointment::findOrFail($id);
-            $this->appointmentService->checkInPatient($appointment, auth()->id());
+            // TEMPORARY: Default to admin user (ID 1) when no auth
+            $this->appointmentService->checkInPatient($appointment, auth()->id() ?? 1);
 
             return response()->json([
                 'success' => true,
@@ -590,6 +706,103 @@ class AppointmentController extends Controller
                 'success' => false,
                 'message' => 'Failed to add to waiting list',
                 'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Public appointment confirmation using token
+     * No authentication required - uses secure token
+     *
+     * POST /api/v1/appointments/confirm-public
+     */
+    public function confirmPublic(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'token' => 'required|string|size:64',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid token format',
+                    'errors' => $validator->errors(),
+                    'timestamp' => now()->toIso8601String(),
+                ], 422);
+            }
+
+            // Find appointment by confirmation token
+            $appointment = Appointment::where('confirmation_token', $request->token)->first();
+
+            if (!$appointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid or expired confirmation token',
+                    'timestamp' => now()->toIso8601String(),
+                ], 404);
+            }
+
+            // Check if token has expired (24 hours from creation)
+            if ($appointment->token_expires_at && now()->isAfter($appointment->token_expires_at)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Confirmation token has expired. Please contact the facility to reschedule.',
+                    'timestamp' => now()->toIso8601String(),
+                ], 410); // 410 Gone
+            }
+
+            // Check if already confirmed
+            if ($appointment->is_confirmed) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Appointment is already confirmed',
+                    'data' => [
+                        'id' => $appointment->id,
+                        'appointment_datetime' => $appointment->appointment_datetime,
+                        'facility_name' => $appointment->facility->name ?? 'Unknown',
+                        'status' => $appointment->status,
+                        'confirmed_at' => $appointment->confirmed_at,
+                    ],
+                    'timestamp' => now()->toIso8601String(),
+                ], 200);
+            }
+
+            // Confirm the appointment
+            $appointment->update([
+                'is_confirmed' => true,
+                'confirmed_at' => now(),
+                'confirmation_method' => 'token',
+                'status' => 'confirmed',
+                'confirmation_token' => null, // Invalidate token after use
+                'token_expires_at' => null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Appointment confirmed successfully',
+                'data' => [
+                    'id' => $appointment->id,
+                    'appointment_datetime' => $appointment->appointment_datetime,
+                    'facility_name' => $appointment->facility->name ?? 'Unknown',
+                    'facility_address' => $appointment->facility->address ?? null,
+                    'facility_phone' => $appointment->facility->phone_number ?? null,
+                    'patient_name' => "{$appointment->patient_first_name} {$appointment->patient_last_name}",
+                    'appointment_type' => $appointment->appointment_type,
+                    'status' => $appointment->status,
+                    'confirmed_at' => $appointment->confirmed_at,
+                ],
+                'timestamp' => now()->toIso8601String(),
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Error confirming appointment', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to confirm appointment',
+                'error' => $e->getMessage(),
+                'timestamp' => now()->toIso8601String(),
             ], 500);
         }
     }

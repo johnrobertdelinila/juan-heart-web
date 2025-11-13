@@ -10,6 +10,7 @@ import type {
   TreatmentOutcomes,
   ClinicalApiResponse,
 } from '@/types/clinical';
+import { handleApiRequest, logApiError } from './api-error-handler';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001/api/v1';
 
@@ -46,16 +47,16 @@ export async function getClinicalDashboard(
   userId: number,
   params?: { start_date?: string; end_date?: string }
 ): Promise<ClinicalDashboard> {
-  const response = await fetch(
-    `${API_URL}/clinical/dashboard${buildQueryString({ user_id: userId, ...params })}`
-  );
+  try {
+    const result = await handleApiRequest<ClinicalApiResponse<ClinicalDashboard>>(
+      `${API_URL}/clinical/dashboard${buildQueryString({ user_id: userId, ...params })}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch clinical dashboard: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, 'getClinicalDashboard');
+    throw error;
   }
-
-  const result: ClinicalApiResponse<ClinicalDashboard> = await response.json();
-  return result.data;
 }
 
 /**
@@ -65,16 +66,16 @@ export async function getAssessmentQueue(
   userId: number,
   filters?: Omit<QueueFilters, 'user_id'>
 ): Promise<AssessmentQueue> {
-  const response = await fetch(
-    `${API_URL}/clinical/assessment-queue${buildQueryString({ user_id: userId, ...filters })}`
-  );
+  try {
+    const result = await handleApiRequest<ClinicalApiResponse<AssessmentQueue>>(
+      `${API_URL}/clinical/assessment-queue${buildQueryString({ user_id: userId, ...filters })}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch assessment queue: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, 'getAssessmentQueue');
+    throw error;
   }
-
-  const result: ClinicalApiResponse<AssessmentQueue> = await response.json();
-  return result.data;
 }
 
 /**
@@ -84,32 +85,32 @@ export async function getRiskStratification(
   userId: number,
   params?: { start_date?: string; end_date?: string }
 ): Promise<PatientRiskStratification> {
-  const response = await fetch(
-    `${API_URL}/clinical/risk-stratification${buildQueryString({ user_id: userId, ...params })}`
-  );
+  try {
+    const result = await handleApiRequest<ClinicalApiResponse<PatientRiskStratification>>(
+      `${API_URL}/clinical/risk-stratification${buildQueryString({ user_id: userId, ...params })}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch risk stratification: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, 'getRiskStratification');
+    throw error;
   }
-
-  const result: ClinicalApiResponse<PatientRiskStratification> = await response.json();
-  return result.data;
 }
 
 /**
  * Get clinical alerts
  */
 export async function getClinicalAlerts(userId: number): Promise<ClinicalAlert[]> {
-  const response = await fetch(
-    `${API_URL}/clinical/alerts${buildQueryString({ user_id: userId })}`
-  );
+  try {
+    const result = await handleApiRequest<ClinicalApiResponse<ClinicalAlert[]>>(
+      `${API_URL}/clinical/alerts${buildQueryString({ user_id: userId })}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch clinical alerts: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, 'getClinicalAlerts');
+    throw error;
   }
-
-  const result: ClinicalApiResponse<ClinicalAlert[]> = await response.json();
-  return result.data;
 }
 
 /**
@@ -119,16 +120,16 @@ export async function getWorkloadMetrics(
   userId: number,
   params?: { start_date?: string; end_date?: string }
 ): Promise<WorkloadMetrics> {
-  const response = await fetch(
-    `${API_URL}/clinical/workload${buildQueryString({ user_id: userId, ...params })}`
-  );
+  try {
+    const result = await handleApiRequest<ClinicalApiResponse<WorkloadMetrics>>(
+      `${API_URL}/clinical/workload${buildQueryString({ user_id: userId, ...params })}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch workload metrics: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, 'getWorkloadMetrics');
+    throw error;
   }
-
-  const result: ClinicalApiResponse<WorkloadMetrics> = await response.json();
-  return result.data;
 }
 
 /**
@@ -138,16 +139,16 @@ export async function getValidationMetrics(
   userId: number,
   params?: { start_date?: string; end_date?: string }
 ): Promise<ValidationMetrics> {
-  const response = await fetch(
-    `${API_URL}/clinical/validation-metrics${buildQueryString({ user_id: userId, ...params })}`
-  );
+  try {
+    const result = await handleApiRequest<ClinicalApiResponse<ValidationMetrics>>(
+      `${API_URL}/clinical/validation-metrics${buildQueryString({ user_id: userId, ...params })}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch validation metrics: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, 'getValidationMetrics');
+    throw error;
   }
-
-  const result: ClinicalApiResponse<ValidationMetrics> = await response.json();
-  return result.data;
 }
 
 /**
@@ -157,14 +158,14 @@ export async function getTreatmentOutcomes(
   userId: number,
   params?: { start_date?: string; end_date?: string }
 ): Promise<TreatmentOutcomes> {
-  const response = await fetch(
-    `${API_URL}/clinical/treatment-outcomes${buildQueryString({ user_id: userId, ...params })}`
-  );
+  try {
+    const result = await handleApiRequest<ClinicalApiResponse<TreatmentOutcomes>>(
+      `${API_URL}/clinical/treatment-outcomes${buildQueryString({ user_id: userId, ...params })}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch treatment outcomes: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, 'getTreatmentOutcomes');
+    throw error;
   }
-
-  const result: ClinicalApiResponse<TreatmentOutcomes> = await response.json();
-  return result.data;
 }

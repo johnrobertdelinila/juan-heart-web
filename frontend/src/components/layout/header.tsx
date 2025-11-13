@@ -82,7 +82,7 @@ export function Header({
           onClick={onMenuClick}
           aria-label="Toggle menu"
         >
-          <Menu className="size-5" />
+          <Menu className="size-5 text-gray-700" strokeWidth={1.5} />
         </Button>
 
         {/* Logo and title */}
@@ -110,7 +110,7 @@ export function Header({
         {showSearch && (
           <form onSubmit={handleSearch} className="hidden flex-1 md:flex md:max-w-md">
             <div className="relative w-full">
-              <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
+              <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-4" strokeWidth={1.5} />
               <Input
                 type="search"
                 placeholder="Search patients, assessments..."
@@ -128,7 +128,7 @@ export function Header({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="size-5" />
+                  <Bell className="size-5 text-gray-700" strokeWidth={1.5} />
                   {notificationCount > 0 && (
                     <span className="bg-destructive text-destructive-foreground absolute top-1 right-1 flex size-4 items-center justify-center rounded-full text-[10px] font-medium">
                       {notificationCount > 9 ? '9+' : notificationCount}
@@ -182,14 +182,14 @@ export function Header({
                         className="size-8 rounded-full object-cover"
                       />
                     ) : (
-                      <User className="size-4" />
+                      <User className="size-4 text-primary" strokeWidth={1.5} />
                     )}
                   </div>
                   <div className="hidden flex-col items-start text-left md:flex">
                     <span className="text-sm font-medium">{user.name}</span>
                     <span className="text-muted-foreground text-xs">{user.role}</span>
                   </div>
-                  <ChevronDown className="text-muted-foreground size-4" />
+                  <ChevronDown className="text-muted-foreground size-4" strokeWidth={1.5} />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -201,16 +201,16 @@ export function Header({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <User className="mr-2 size-4" />
+                  <User className="mr-2 size-4 text-gray-600" strokeWidth={1.5} />
                   Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Settings className="mr-2 size-4" />
+                  <Settings className="mr-2 size-4 text-gray-600" strokeWidth={1.5} />
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onLogout}>
-                  <LogOut className="mr-2 size-4" />
+                  <LogOut className="mr-2 size-4 text-gray-600" strokeWidth={1.5} />
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>

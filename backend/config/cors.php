@@ -23,14 +23,24 @@ return [
         env('FRONTEND_URL', 'http://localhost:3001'),
         'http://localhost:3000',
         'http://localhost:3001',
+        'http://localhost:3003',
         'http://127.0.0.1:3000',
         'http://127.0.0.1:3001',
+        'http://127.0.0.1:3003',
+        // Production URLs (configure via .env)
+        env('PRODUCTION_WEB_URL', ''),
+        env('PRODUCTION_MOBILE_URL', ''),
     ],
 
     'allowed_origins_patterns' => [
         // Allow all localhost ports for development
         '/^http:\/\/localhost:\d+$/',
         '/^http:\/\/127\.0\.0\.1:\d+$/',
+        // Allow mobile app capacitor/ionic origins
+        '/^capacitor:\/\//',
+        '/^ionic:\/\//',
+        // Allow file protocol for mobile apps
+        '/^file:\/\//',
     ],
 
     'allowed_headers' => ['*'],

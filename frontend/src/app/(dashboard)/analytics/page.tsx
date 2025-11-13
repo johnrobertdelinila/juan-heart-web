@@ -37,6 +37,7 @@ import {
 import { getNationalOverview, getRealTimeMetrics } from '@/lib/api/analytics';
 import type { NationalOverview, RealTimeMetrics } from '@/types/analytics';
 import { toast } from 'sonner';
+import { PageHeaderSkeleton, StatCardSkeleton, ChartSkeleton } from '@/components/animations';
 
 // Juan Heart color palette
 const COLORS = {
@@ -103,10 +104,67 @@ export default function AnalyticsPage() {
 
   if (loading || !overview) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="text-heart-red mx-auto h-12 w-12 animate-spin" />
-          <p className="mt-4 text-gray-600">Loading analytics dashboard...</p>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <PageHeaderSkeleton />
+        </div>
+
+        {/* Summary KPI Cards Skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} index={i} disableHoverLift={true}>
+              <CardContent className="pt-6">
+                <StatCardSkeleton />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Real-Time Metrics Skeleton */}
+        <Card index={4} disableHoverLift={true}>
+          <CardHeader>
+            <CardTitle>Real-Time Assessment Metrics</CardTitle>
+            <CardDescription>Live assessment counts across different time periods</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="space-y-2 text-center">
+                  <StatCardSkeleton />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Charts Skeleton */}
+        <Card index={5} disableHoverLift={true}>
+          <CardHeader>
+            <CardTitle>Assessment Trends Over Time</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ChartSkeleton />
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card index={6} disableHoverLift={true}>
+            <CardHeader>
+              <CardTitle>Risk Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartSkeleton />
+            </CardContent>
+          </Card>
+          <Card index={7} disableHoverLift={true}>
+            <CardHeader>
+              <CardTitle>Demographics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartSkeleton />
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -149,7 +207,7 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-midnight-blue text-3xl font-bold">National Overview Dashboard</h1>
+          <h1 className="text-midnight-blue text-3xl font-semibold">National Overview Dashboard</h1>
           <p className="text-gray-600">
             Comprehensive analytics and insights for Juan Heart platform
           </p>
@@ -160,14 +218,14 @@ export default function AnalyticsPage() {
             Refresh
           </Button>
           <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
+            <Download className="mr-2 h-4 w-4 text-gray-700" />
             Export
           </Button>
         </div>
       </div>
 
       {/* Date Range Filters */}
-      <Card>
+      <Card index={0}>
         <CardHeader>
           <CardTitle className="flex items-center text-lg">
             <Calendar className="mr-2 h-5 w-5" />
@@ -201,13 +259,13 @@ export default function AnalyticsPage() {
 
       {/* Summary KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card index={1}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Assessments</CardTitle>
             <Activity className="text-heart-red h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-semibold">
               {overview.summary.total_assessments.toLocaleString()}
             </div>
             <p className="flex items-center text-xs text-gray-600">
@@ -221,13 +279,13 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card index={2}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">High Risk Cases</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-semibold">
               {overview.summary.high_risk_cases.toLocaleString()}
             </div>
             <p className="text-xs text-gray-600">
@@ -236,13 +294,13 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card index={3}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Avg Risk Score</CardTitle>
             <Activity className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-semibold">
               {overview.summary.average_risk_score.toFixed(1)}
             </div>
             <p className="flex items-center text-xs text-gray-600">
@@ -256,13 +314,13 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card index={4}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Facilities</CardTitle>
             <MapPin className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{overview.summary.active_facilities}</div>
+            <div className="text-2xl font-semibold">{overview.summary.active_facilities}</div>
             <p className="text-xs text-gray-600">Healthcare facilities registered</p>
           </CardContent>
         </Card>
@@ -270,7 +328,7 @@ export default function AnalyticsPage() {
 
       {/* Real-Time Metrics */}
       {realTimeMetrics && (
-        <Card>
+        <Card index={5}>
           <CardHeader>
             <CardTitle>Real-Time Assessment Metrics</CardTitle>
             <CardDescription>Live assessment counts across different time periods</CardDescription>
@@ -278,25 +336,29 @@ export default function AnalyticsPage() {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-5">
               <div className="text-center">
-                <p className="text-heart-red text-2xl font-bold">
+                <p className="text-heart-red text-2xl font-semibold">
                   {realTimeMetrics.total.toLocaleString()}
                 </p>
                 <p className="text-sm text-gray-600">Total</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold">{realTimeMetrics.today.toLocaleString()}</p>
+                <p className="text-2xl font-semibold">{realTimeMetrics.today.toLocaleString()}</p>
                 <p className="text-sm text-gray-600">Today</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold">{realTimeMetrics.this_week.toLocaleString()}</p>
+                <p className="text-2xl font-semibold">
+                  {realTimeMetrics.this_week.toLocaleString()}
+                </p>
                 <p className="text-sm text-gray-600">This Week</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold">{realTimeMetrics.this_month.toLocaleString()}</p>
+                <p className="text-2xl font-semibold">
+                  {realTimeMetrics.this_month.toLocaleString()}
+                </p>
                 <p className="text-sm text-gray-600">This Month</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-amber-600">
+                <p className="text-2xl font-semibold text-amber-600">
                   {realTimeMetrics.pending_validation.toLocaleString()}
                 </p>
                 <p className="text-sm text-gray-600">Pending Validation</p>
@@ -577,7 +639,9 @@ export default function AnalyticsPage() {
                 <CardTitle className="text-lg">Validation Rate</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{overview.system_health.validation_rate}%</div>
+                <div className="text-3xl font-semibold">
+                  {overview.system_health.validation_rate}%
+                </div>
                 <p className="text-sm text-gray-600">Assessments validated by clinicians</p>
               </CardContent>
             </Card>
@@ -587,7 +651,7 @@ export default function AnalyticsPage() {
                 <CardTitle className="text-lg">Avg Validation Time</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">
+                <div className="text-3xl font-semibold">
                   {overview.system_health.avg_validation_time_hours.toFixed(1)}h
                 </div>
                 <p className="text-sm text-gray-600">Time to clinical validation</p>
@@ -599,7 +663,7 @@ export default function AnalyticsPage() {
                 <CardTitle className="text-lg">Referral Acceptance</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">
+                <div className="text-3xl font-semibold">
                   {overview.system_health.referral_acceptance_rate}%
                 </div>
                 <p className="text-sm text-gray-600">Referrals accepted by facilities</p>
@@ -614,19 +678,19 @@ export default function AnalyticsPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">System Uptime</span>
-                <span className="text-2xl font-bold text-green-600">
+                <span className="text-2xl font-semibold text-green-600">
                   {overview.system_health.system_uptime}%
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Active Users Today</span>
-                <span className="text-2xl font-bold">
+                <span className="text-2xl font-semibold">
                   {overview.system_health.active_users_today}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Referral Completion Rate</span>
-                <span className="text-2xl font-bold">
+                <span className="text-2xl font-semibold">
                   {overview.summary.referral_completion_rate}%
                 </span>
               </div>

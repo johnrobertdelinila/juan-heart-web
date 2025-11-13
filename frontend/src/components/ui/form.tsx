@@ -12,9 +12,11 @@ import {
   type FieldPath,
   type FieldValues,
 } from 'react-hook-form';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
+import { formMessageVariants, getAnimationVariants } from '@/lib/framer-config';
 
 const Form = FormProvider;
 
@@ -69,12 +71,51 @@ type FormItemContextValue = {
 
 const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue);
 
-function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
+interface FormItemProps extends React.ComponentProps<'div'> {
+  /**
+   * Index for stagger animation when multiple fields are rendered
+   */
+  index?: number;
+  /**
+   * Disable animations
+   * @default false
+   */
+  disableAnimations?: boolean;
+}
+
+function FormItem({ className, index, disableAnimations = false, ...props }: FormItemProps) {
   const id = React.useId();
+
+  // Optional stagger animation for multiple form fields
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: typeof index === 'number' ? index * 0.05 : 0,
+        duration: 0.2,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+  };
+
+  const variants = disableAnimations ? undefined : getAnimationVariants(itemVariants);
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div data-slot="form-item" className={cn('grid gap-2', className)} {...props} />
+      {variants && typeof index === 'number' ? (
+        <motion.div
+          data-slot="form-item"
+          className={cn('grid gap-2', className)}
+          variants={variants}
+          initial="hidden"
+          animate="visible"
+          {...props}
+        />
+      ) : (
+        <div data-slot="form-item" className={cn('grid gap-2', className)} {...props} />
+      )}
     </FormItemContext.Provider>
   );
 }
@@ -120,23 +161,38 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
   );
 }
 
-function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
+interface FormMessageProps extends React.ComponentProps<'p'> {
+  /**
+   * Disable animations
+   * @default false
+   */
+  disableAnimations?: boolean;
+}
+
+function FormMessage({ className, disableAnimations = false, ...props }: FormMessageProps) {
   const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message ?? '') : props.children;
 
-  if (!body) {
-    return null;
-  }
+  const variants = disableAnimations ? undefined : getAnimationVariants(formMessageVariants);
 
   return (
-    <p
-      data-slot="form-message"
-      id={formMessageId}
-      className={cn('text-destructive text-sm', className)}
-      {...props}
-    >
-      {body}
-    </p>
+    <AnimatePresence mode="wait">
+      {body && (
+        <motion.p
+          key={formMessageId}
+          data-slot="form-message"
+          id={formMessageId}
+          className={cn('text-destructive text-sm', className)}
+          variants={variants}
+          initial={variants ? 'hidden' : undefined}
+          animate={variants ? 'visible' : undefined}
+          exit={variants ? 'exit' : undefined}
+          {...props}
+        >
+          {body}
+        </motion.p>
+      )}
+    </AnimatePresence>
   );
 }
 

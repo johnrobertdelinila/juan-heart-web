@@ -61,6 +61,7 @@ class Assessment extends Model
         'processing_time_ms',
         'mobile_created_at',
         'synced_at',
+        'version_counter',
     ];
 
     /**
@@ -126,6 +127,14 @@ class Assessment extends Model
     public function comments()
     {
         return $this->hasMany(AssessmentComment::class);
+    }
+
+    /**
+     * Get risk adjustment history.
+     */
+    public function riskAdjustments()
+    {
+        return $this->hasMany(AssessmentRiskAdjustment::class);
     }
 
     /**

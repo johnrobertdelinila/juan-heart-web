@@ -80,6 +80,14 @@ class AssessmentComment extends Model
     }
 
     /**
+     * Get attachments for this clinical note/comment.
+     */
+    public function attachments()
+    {
+        return $this->hasMany(AssessmentAttachment::class, 'comment_id');
+    }
+
+    /**
      * Scope a query to only include top-level comments.
      */
     public function scopeTopLevel($query)

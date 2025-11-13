@@ -57,9 +57,12 @@ return new class extends Migration
             $table->index(['category', 'published']);
             $table->index(['published', 'created_at']);
 
-            // Fulltext search indexes (MySQL 5.6+ required)
-            $table->fullText(['title_en', 'title_fil'], 'educational_content_title_fulltext');
-            $table->fullText(['description_en', 'description_fil'], 'educational_content_desc_fulltext');
+            // Fulltext search indexes (MySQL 5.6+ required, not supported in SQLite)
+            // For production use MySQL, for testing these will be skipped
+            if (Schema::connection(null)->getConnection()->getDriverName() !== 'sqlite') {
+                $table->fullText(['title_en', 'title_fil'], 'educational_content_title_fulltext');
+                $table->fullText(['description_en', 'description_fil'], 'educational_content_desc_fulltext');
+            }
         });
     }
 

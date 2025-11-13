@@ -81,7 +81,7 @@ export default function FacilityDashboardPage({ params }: PageProps) {
   if (error || !dashboard) {
     return (
       <div className="container mx-auto p-6">
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-red-50" index={0} disableHoverLift>
           <CardHeader>
             <CardTitle className="text-red-600">Error Loading Dashboard</CardTitle>
             <CardDescription>{error || 'Failed to load facility dashboard'}</CardDescription>
@@ -126,7 +126,7 @@ export default function FacilityDashboardPage({ params }: PageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{summary.facility_name}</h1>
+          <h1 className="text-3xl font-semibold text-gray-900">{summary.facility_name}</h1>
           <div className="mt-2 flex items-center gap-3">
             <Badge variant="outline">{summary.facility_type}</Badge>
             <span className="text-sm text-gray-500">Facility ID: {facilityId}</span>
@@ -134,7 +134,7 @@ export default function FacilityDashboardPage({ params }: PageProps) {
         </div>
         <div className="flex gap-3">
           <Button variant="outline">
-            <Calendar className="mr-2 h-4 w-4" />
+            <Calendar className="mr-2 h-4 w-4 text-gray-700" />
             Date Range
           </Button>
           <Button>Export Report</Button>
@@ -143,48 +143,48 @@ export default function FacilityDashboardPage({ params }: PageProps) {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card index={0}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Assessments Processed</CardTitle>
             <Activity className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-semibold">
               {summary.assessments_processed.toLocaleString()}
             </div>
             <p className="mt-1 text-xs text-gray-500">Total processed</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card index={1}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Patients</CardTitle>
             <Users className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.active_patients.toLocaleString()}</div>
+            <div className="text-2xl font-semibold">{summary.active_patients.toLocaleString()}</div>
             <p className="mt-1 text-xs text-gray-500">Currently active</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card index={2}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Referrals</CardTitle>
             <FileText className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.pending_referrals.toLocaleString()}</div>
+            <div className="text-2xl font-semibold">{summary.pending_referrals.toLocaleString()}</div>
             <p className="mt-1 text-xs text-gray-500">Awaiting review</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card index={3}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
             <Clock className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.avg_response_time_hours.toFixed(1)}h</div>
+            <div className="text-2xl font-semibold">{summary.avg_response_time_hours.toFixed(1)}h</div>
             <p className="mt-1 text-xs text-gray-500">Average hours</p>
           </CardContent>
         </Card>
@@ -193,7 +193,7 @@ export default function FacilityDashboardPage({ params }: PageProps) {
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Patient Flow */}
-        <Card>
+        <Card index={4}>
           <CardHeader>
             <CardTitle>Patient Flow (Last 14 Days)</CardTitle>
             <CardDescription>Daily referral admissions, rejections, and pending</CardDescription>
@@ -214,22 +214,22 @@ export default function FacilityDashboardPage({ params }: PageProps) {
             <div className="mt-4 grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-sm text-gray-500">Total Referrals</div>
-                <div className="text-xl font-bold">{patient_flow.total_referrals_received}</div>
+                <div className="text-xl font-semibold">{patient_flow.total_referrals_received}</div>
               </div>
               <div>
                 <div className="text-sm text-gray-500">Admitted</div>
-                <div className="text-xl font-bold">{patient_flow.admitted_patients}</div>
+                <div className="text-xl font-semibold">{patient_flow.admitted_patients}</div>
               </div>
               <div>
                 <div className="text-sm text-gray-500">Admission Rate</div>
-                <div className="text-xl font-bold">{patient_flow.admission_rate}%</div>
+                <div className="text-xl font-semibold">{patient_flow.admission_rate}%</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Referral Metrics */}
-        <Card>
+        <Card index={5}>
           <CardHeader>
             <CardTitle>Referral Performance</CardTitle>
             <CardDescription>Acceptance vs Rejection rates</CardDescription>
@@ -257,13 +257,13 @@ export default function FacilityDashboardPage({ params }: PageProps) {
             <div className="mt-4 grid grid-cols-2 gap-4 text-center">
               <div>
                 <div className="text-sm text-gray-500">Acceptance Rate</div>
-                <div className="text-xl font-bold text-green-600">
+                <div className="text-xl font-semibold text-green-600">
                   {referral_metrics.acceptance_rate}%
                 </div>
               </div>
               <div>
                 <div className="text-sm text-gray-500">Rejection Rate</div>
-                <div className="text-xl font-bold text-orange-600">
+                <div className="text-xl font-semibold text-orange-600">
                   {referral_metrics.rejection_rate}%
                 </div>
               </div>
@@ -275,7 +275,7 @@ export default function FacilityDashboardPage({ params }: PageProps) {
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Capacity Utilization */}
-        <Card>
+        <Card index={6}>
           <CardHeader>
             <CardTitle>Capacity Utilization</CardTitle>
             <CardDescription>Bed and ICU occupancy</CardDescription>
@@ -326,17 +326,17 @@ export default function FacilityDashboardPage({ params }: PageProps) {
                 <div className="text-center">
                   <Bed className="mx-auto mb-1 h-5 w-5 text-gray-500" />
                   <div className="text-sm text-gray-500">Total Capacity</div>
-                  <div className="text-lg font-bold">{capacity_utilization?.bed_capacity ?? 0}</div>
+                  <div className="text-lg font-semibold">{capacity_utilization?.bed_capacity ?? 0}</div>
                 </div>
                 <div className="text-center">
                   <Users className="mx-auto mb-1 h-5 w-5 text-gray-500" />
                   <div className="text-sm text-gray-500">Staff</div>
-                  <div className="text-lg font-bold">{capacity_utilization?.staff_count ?? 0}</div>
+                  <div className="text-lg font-semibold">{capacity_utilization?.staff_count ?? 0}</div>
                 </div>
                 <div className="text-center">
                   <Activity className="mx-auto mb-1 h-5 w-5 text-gray-500" />
                   <div className="text-sm text-gray-500">Patients/Staff</div>
-                  <div className="text-lg font-bold">
+                  <div className="text-lg font-semibold">
                     {(capacity_utilization?.patients_per_staff ?? 0).toFixed(1)}
                   </div>
                 </div>
@@ -346,7 +346,7 @@ export default function FacilityDashboardPage({ params }: PageProps) {
         </Card>
 
         {/* Performance Comparison */}
-        <Card>
+        <Card index={7}>
           <CardHeader>
             <CardTitle>Performance Benchmarking</CardTitle>
             <CardDescription>
@@ -366,13 +366,13 @@ export default function FacilityDashboardPage({ params }: PageProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-lg bg-red-50 p-4">
                     <div className="mb-1 text-xs text-gray-500">This Facility</div>
-                    <div className="text-2xl font-bold text-red-600">
+                    <div className="text-2xl font-semibold text-red-600">
                       {performance_comparison.acceptance_rate.this_facility}%
                     </div>
                   </div>
                   <div className="rounded-lg bg-gray-50 p-4">
                     <div className="mb-1 text-xs text-gray-500">Average</div>
-                    <div className="text-2xl font-bold text-gray-600">
+                    <div className="text-2xl font-semibold text-gray-600">
                       {performance_comparison.acceptance_rate.average_for_type}%
                     </div>
                   </div>
@@ -387,13 +387,13 @@ export default function FacilityDashboardPage({ params }: PageProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-lg bg-red-50 p-4">
                     <div className="mb-1 text-xs text-gray-500">This Facility</div>
-                    <div className="text-2xl font-bold text-red-600">
+                    <div className="text-2xl font-semibold text-red-600">
                       {performance_comparison.avg_response_time.this_facility}h
                     </div>
                   </div>
                   <div className="rounded-lg bg-gray-50 p-4">
                     <div className="mb-1 text-xs text-gray-500">Average</div>
-                    <div className="text-2xl font-bold text-gray-600">
+                    <div className="text-2xl font-semibold text-gray-600">
                       {performance_comparison.avg_response_time.average_for_type}h
                     </div>
                   </div>
@@ -407,7 +407,7 @@ export default function FacilityDashboardPage({ params }: PageProps) {
       {/* Staff Productivity & Top Referral Sources */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Staff Productivity */}
-        <Card>
+        <Card index={8}>
           <CardHeader>
             <CardTitle>Staff Productivity</CardTitle>
             <CardDescription>Top performing doctors by validations</CardDescription>
@@ -429,21 +429,21 @@ export default function FacilityDashboardPage({ params }: PageProps) {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-lg font-bold">{doctor.validations_count}</div>
+                    <div className="text-lg font-semibold">{doctor.validations_count}</div>
                     <div className="text-xs text-gray-500">validations</div>
                   </div>
                 </div>
               ))}
               <div className="border-t pt-4 text-center">
                 <div className="text-sm text-gray-500">Total Validations</div>
-                <div className="text-2xl font-bold">{staff_productivity.total_validations}</div>
+                <div className="text-2xl font-semibold">{staff_productivity.total_validations}</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Top Referral Sources */}
-        <Card>
+        <Card index={9}>
           <CardHeader>
             <CardTitle>Top Referral Sources</CardTitle>
             <CardDescription>Facilities sending most referrals</CardDescription>
@@ -459,7 +459,7 @@ export default function FacilityDashboardPage({ params }: PageProps) {
                     <div className="truncate font-medium">{source.name}</div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="text-lg font-bold">{source.count}</div>
+                    <div className="text-lg font-semibold">{source.count}</div>
                     <div className="h-2 w-24 rounded-full bg-gray-200">
                       <div
                         className="h-2 rounded-full bg-red-600"

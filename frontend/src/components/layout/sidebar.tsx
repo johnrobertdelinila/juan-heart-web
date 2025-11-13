@@ -117,18 +117,27 @@ export function Sidebar({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  'hover:bg-accent hover:text-accent-foreground',
-                  isActive && 'bg-accent text-accent-foreground',
+                  'group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'hover:bg-accent',
+                  isActive && 'bg-accent',
                   item.disabled && 'pointer-events-none opacity-50',
                   collapsed && 'justify-center px-2'
                 )}
                 title={collapsed ? item.title : undefined}
               >
-                <Icon className="size-5 shrink-0" />
+                <Icon
+                  className={cn(
+                    'size-5 shrink-0 transition-colors',
+                    isActive ? '!text-red-600' : 'text-slate-700 group-hover:text-slate-900'
+                  )}
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
                 {!collapsed && (
                   <>
-                    <span className="flex-1">{item.title}</span>
+                    <span className="flex-1 text-slate-700 group-hover:text-slate-900">
+                      {item.title}
+                    </span>
                     {item.badge && (
                       <span className="bg-primary text-primary-foreground flex size-5 items-center justify-center rounded-full text-xs font-medium">
                         {typeof item.badge === 'number' && item.badge > 9 ? '9+' : item.badge}
@@ -152,10 +161,10 @@ export function Sidebar({
               aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {collapsed ? (
-                <ChevronRight className="size-5" />
+                <ChevronRight className="size-5 text-slate-700" strokeWidth={1.5} aria-hidden="true" />
               ) : (
                 <>
-                  <ChevronLeft className="size-5" />
+                  <ChevronLeft className="size-5 text-slate-700" strokeWidth={1.5} aria-hidden="true" />
                   <span className="ml-2 text-sm">Collapse</span>
                 </>
               )}

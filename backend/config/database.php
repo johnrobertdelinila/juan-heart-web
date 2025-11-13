@@ -42,6 +42,14 @@ return [
             'synchronous' => null,
         ],
 
+        'sqlite_testing' => [
+            'driver' => 'sqlite',
+            'url' => env('DB_URL'),
+            'database' => ':memory:',
+            'prefix' => '',
+            'foreign_key_constraints' => true,
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
@@ -59,7 +67,17 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                // Connection resilience and pooling
+                PDO::ATTR_PERSISTENT => env('DB_PERSISTENT', false),
+                PDO::ATTR_TIMEOUT => 5,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET SESSION sql_mode="STRICT_ALL_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"',
             ]) : [],
+            'sticky' => true,
+            'pool' => [
+                'min' => 2,
+                'max' => 10,
+            ],
         ],
 
         'mariadb' => [

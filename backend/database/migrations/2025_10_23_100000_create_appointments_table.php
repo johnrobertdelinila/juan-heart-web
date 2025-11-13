@@ -37,7 +37,10 @@ return new class extends Migration
 
             $table->dateTime('appointment_datetime');
             $table->integer('duration_minutes')->default(30); // Default 30-minute slot
-            $table->dateTime('appointment_end_datetime')->storedAs('DATE_ADD(appointment_datetime, INTERVAL duration_minutes MINUTE)');
+
+            // For SQLite compatibility, we use nullable instead of storedAs (MySQL-specific)
+            // Applications should calculate this programmatically
+            $table->dateTime('appointment_end_datetime')->nullable();
 
             // Appointment Type
             $table->enum('appointment_type', [

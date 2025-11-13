@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { ColumnDef } from '@tanstack/react-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,15 +15,14 @@ import type { Table } from '@tanstack/react-table';
 import { Users, UserPlus } from 'lucide-react';
 import { getPatients, getPatientStatistics } from '@/lib/api/patient';
 import type { Patient, PatientStatistics } from '@/types/patient';
+import { PageHeaderSkeleton, StatCardSkeleton, DataTableSkeleton } from '@/components/animations';
 
 // Column definitions
 const columns: ColumnDef<Patient>[] = [
   {
     accessorKey: 'patient_full_name',
     id: 'patient_full_name',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Patient Name" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Patient Name" />,
     cell: ({ row }) => {
       const patient = row.original;
       return (
@@ -30,9 +30,7 @@ const columns: ColumnDef<Patient>[] = [
           <div className="bg-heart-red/10 flex h-10 w-10 items-center justify-center rounded-full">
             <Users className="text-heart-red h-5 w-5" strokeWidth={1.5} />
           </div>
-          <span className="text-midnight-blue font-medium">
-            {patient.patient_full_name}
-          </span>
+          <span className="text-midnight-blue font-medium">{patient.patient_full_name}</span>
         </div>
       );
     },
@@ -42,9 +40,7 @@ const columns: ColumnDef<Patient>[] = [
   {
     id: 'age_sex',
     accessorFn: (row) => `${getAge(row.patient_date_of_birth)}y / ${row.patient_sex}`,
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Age / Sex" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Age / Sex" />,
     cell: ({ row }) => {
       const patient = row.original;
       return (
@@ -58,16 +54,10 @@ const columns: ColumnDef<Patient>[] = [
   {
     accessorKey: 'latest_risk_level',
     id: 'latest_risk_level',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Risk Level" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Risk Level" />,
     cell: ({ row }) => {
       const riskLevel = row.getValue('latest_risk_level') as string;
-      return (
-        <Badge className={getRiskColor(riskLevel)}>
-          {riskLevel}
-        </Badge>
-      );
+      return <Badge className={getRiskColor(riskLevel)}>{riskLevel}</Badge>;
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
@@ -77,16 +67,10 @@ const columns: ColumnDef<Patient>[] = [
   {
     accessorKey: 'status',
     id: 'status',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       const status = row.getValue('status') as string;
-      return (
-        <Badge className={getStatusColor(status)}>
-          {status}
-        </Badge>
-      );
+      return <Badge className={getStatusColor(status)}>{status}</Badge>;
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
@@ -96,43 +80,32 @@ const columns: ColumnDef<Patient>[] = [
   {
     accessorKey: 'last_assessment_date',
     id: 'last_assessment_date',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Last Assessment" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Last Assessment" />,
     cell: ({ row }) => {
       const date = row.getValue('last_assessment_date') as string;
-      return (
-        <span className="text-sm text-gray-700">
-          {formatDate(date)}
-        </span>
-      );
+      return <span className="text-sm text-gray-700">{formatDate(date)}</span>;
     },
     enableSorting: true,
   },
   {
     accessorKey: 'total_assessments',
     id: 'total_assessments',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Total Assessments" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Total Assessments" />,
     cell: ({ row }) => {
       const count = row.getValue('total_assessments') as number;
-      return (
-        <span className="text-sm text-gray-700 text-center block font-mono">
-          {count}
-        </span>
-      );
+      return <span className="block text-center font-mono text-sm text-gray-700">{count}</span>;
     },
     enableSorting: true,
   },
   {
     id: 'actions',
     header: () => <div className="text-right">Actions</div>,
-    cell: () => {
+    cell: ({ row }) => {
+      const patient = row.original;
       return (
         <div className="text-right">
-          <Button variant="outline" size="sm">
-            View Profile
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/patients/${patient.id}`}>View Profile</Link>
           </Button>
         </div>
       );
@@ -198,11 +171,11 @@ export default function PatientsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch patients list
-        const patientsResponse = await getPatients({ per_page: 100 });
-
-        // Fetch statistics
-        const statsResponse = await getPatientStatistics();
+        // Fetch patients list and statistics in parallel
+        const [patientsResponse, statsResponse] = await Promise.all([
+          getPatients({ per_page: 100 }),
+          getPatientStatistics(),
+        ]);
 
         if (patientsResponse.success) {
           setPatients(patientsResponse.data);
@@ -227,7 +200,15 @@ export default function PatientsPage() {
 
     const rows = table.getFilteredRowModel().rows;
     const csv = [
-      ['Patient Name', 'Age', 'Sex', 'Risk Level', 'Status', 'Last Assessment', 'Total Assessments'].join(','),
+      [
+        'Patient Name',
+        'Age',
+        'Sex',
+        'Risk Level',
+        'Status',
+        'Last Assessment',
+        'Total Assessments',
+      ].join(','),
       ...rows.map((row) => {
         const patient = row.original;
         return [
@@ -253,11 +234,43 @@ export default function PatientsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <div className="text-center">
-          <div className="border-t-heart-red mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-gray-300" />
-          <p className="text-gray-600">Loading patients...</p>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <PageHeaderSkeleton />
+
+        {/* Stats Cards Skeleton */}
+        <div className="grid gap-6 md:grid-cols-4">
+          <Card index={0} disableHoverLift={true}>
+            <CardContent className="pt-6">
+              <StatCardSkeleton />
+            </CardContent>
+          </Card>
+          <Card index={1} disableHoverLift={true}>
+            <CardContent className="pt-6">
+              <StatCardSkeleton />
+            </CardContent>
+          </Card>
+          <Card index={2} disableHoverLift={true}>
+            <CardContent className="pt-6">
+              <StatCardSkeleton />
+            </CardContent>
+          </Card>
+          <Card index={3} disableHoverLift={true}>
+            <CardContent className="pt-6">
+              <StatCardSkeleton />
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Data Table Skeleton */}
+        <Card index={4} disableHoverLift={true}>
+          <CardHeader>
+            <CardTitle>Patient Registry</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTableSkeleton />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -267,7 +280,9 @@ export default function PatientsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-midnight-blue text-4xl md:text-5xl font-semibold tracking-tight">Patients</h1>
+          <h1 className="text-midnight-blue text-4xl font-semibold tracking-tight md:text-5xl">
+            Patients
+          </h1>
           <p className="mt-2 text-gray-600">
             Manage patient records and track cardiovascular health
           </p>
@@ -283,7 +298,9 @@ export default function PatientsPage() {
         <Card index={0}>
           <CardHeader className="pb-3">
             <CardDescription>Total Patients</CardDescription>
-            <CardTitle className="text-3xl font-semibold tracking-tight font-mono tabular-nums">{stats?.total_patients.toLocaleString() || 0}</CardTitle>
+            <CardTitle className="font-mono text-3xl font-semibold tracking-tight tabular-nums">
+              {stats?.total_patients.toLocaleString() || 0}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-gray-600">All time</p>
@@ -293,7 +310,7 @@ export default function PatientsPage() {
         <Card index={1}>
           <CardHeader className="pb-3">
             <CardDescription>Active Patients</CardDescription>
-            <CardTitle className="text-3xl font-semibold tracking-tight font-mono tabular-nums text-green-600">
+            <CardTitle className="font-mono text-3xl font-semibold tracking-tight text-green-600 tabular-nums">
               {stats?.active_patients || 0}
             </CardTitle>
           </CardHeader>
@@ -305,7 +322,7 @@ export default function PatientsPage() {
         <Card index={2}>
           <CardHeader className="pb-3">
             <CardDescription>Follow-up Required</CardDescription>
-            <CardTitle className="text-3xl font-semibold tracking-tight font-mono tabular-nums text-blue-600">
+            <CardTitle className="font-mono text-3xl font-semibold tracking-tight text-blue-600 tabular-nums">
               {stats?.follow_up_patients || 0}
             </CardTitle>
           </CardHeader>
@@ -317,7 +334,7 @@ export default function PatientsPage() {
         <Card index={3}>
           <CardHeader className="pb-3">
             <CardDescription>High Risk Patients</CardDescription>
-            <CardTitle className="text-3xl font-semibold tracking-tight font-mono tabular-nums text-red-600">
+            <CardTitle className="font-mono text-3xl font-semibold tracking-tight text-red-600 tabular-nums">
               {stats?.high_risk_patients || 0}
             </CardTitle>
           </CardHeader>
@@ -328,7 +345,7 @@ export default function PatientsPage() {
       </div>
 
       {/* Patients List */}
-      <Card index={4}>
+      <Card index={4} disableHoverLift={true}>
         <CardHeader>
           <CardTitle>Patient Registry</CardTitle>
         </CardHeader>

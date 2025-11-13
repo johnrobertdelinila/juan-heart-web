@@ -11,6 +11,7 @@ import type {
   RevenueAnalytics,
   FacilityApiResponse,
 } from '@/types/facility';
+import { handleApiRequest, logApiError } from './api-error-handler';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001/api/v1';
 
@@ -38,16 +39,16 @@ export async function getFacilityDashboard(
   facilityId: number,
   params?: DateRangeParams
 ): Promise<FacilityDashboard> {
-  const response = await fetch(
-    `${API_URL}/facilities/${facilityId}/dashboard${buildQueryString(params)}`
-  );
+  try {
+    const result = await handleApiRequest<FacilityApiResponse<FacilityDashboard>>(
+      `${API_URL}/facilities/${facilityId}/dashboard${buildQueryString(params)}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch facility dashboard: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, `getFacilityDashboard(${facilityId})`);
+    throw error;
   }
-
-  const result: FacilityApiResponse<FacilityDashboard> = await response.json();
-  return result.data;
 }
 
 /**
@@ -57,16 +58,16 @@ export async function getFacilitySummary(
   facilityId: number,
   params?: DateRangeParams
 ): Promise<FacilitySummary> {
-  const response = await fetch(
-    `${API_URL}/facilities/${facilityId}/summary${buildQueryString(params)}`
-  );
+  try {
+    const result = await handleApiRequest<FacilityApiResponse<FacilitySummary>>(
+      `${API_URL}/facilities/${facilityId}/summary${buildQueryString(params)}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch facility summary: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, `getFacilitySummary(${facilityId})`);
+    throw error;
   }
-
-  const result: FacilityApiResponse<FacilitySummary> = await response.json();
-  return result.data;
 }
 
 /**
@@ -76,16 +77,16 @@ export async function getPatientFlowMetrics(
   facilityId: number,
   params?: DateRangeParams
 ): Promise<PatientFlowMetrics> {
-  const response = await fetch(
-    `${API_URL}/facilities/${facilityId}/patient-flow${buildQueryString(params)}`
-  );
+  try {
+    const result = await handleApiRequest<FacilityApiResponse<PatientFlowMetrics>>(
+      `${API_URL}/facilities/${facilityId}/patient-flow${buildQueryString(params)}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch patient flow metrics: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, `getPatientFlowMetrics(${facilityId})`);
+    throw error;
   }
-
-  const result: FacilityApiResponse<PatientFlowMetrics> = await response.json();
-  return result.data;
 }
 
 /**
@@ -95,16 +96,16 @@ export async function getReferralMetrics(
   facilityId: number,
   params?: DateRangeParams
 ): Promise<ReferralMetrics> {
-  const response = await fetch(
-    `${API_URL}/facilities/${facilityId}/referral-metrics${buildQueryString(params)}`
-  );
+  try {
+    const result = await handleApiRequest<FacilityApiResponse<ReferralMetrics>>(
+      `${API_URL}/facilities/${facilityId}/referral-metrics${buildQueryString(params)}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch referral metrics: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, `getReferralMetrics(${facilityId})`);
+    throw error;
   }
-
-  const result: FacilityApiResponse<ReferralMetrics> = await response.json();
-  return result.data;
 }
 
 /**
@@ -114,16 +115,16 @@ export async function getCapacityMetrics(
   facilityId: number,
   params?: DateRangeParams
 ): Promise<CapacityUtilization> {
-  const response = await fetch(
-    `${API_URL}/facilities/${facilityId}/capacity-metrics${buildQueryString(params)}`
-  );
+  try {
+    const result = await handleApiRequest<FacilityApiResponse<CapacityUtilization>>(
+      `${API_URL}/facilities/${facilityId}/capacity-metrics${buildQueryString(params)}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch capacity metrics: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, `getCapacityMetrics(${facilityId})`);
+    throw error;
   }
-
-  const result: FacilityApiResponse<CapacityUtilization> = await response.json();
-  return result.data;
 }
 
 /**
@@ -133,16 +134,16 @@ export async function getStaffProductivity(
   facilityId: number,
   params?: DateRangeParams
 ): Promise<StaffProductivity> {
-  const response = await fetch(
-    `${API_URL}/facilities/${facilityId}/staff-productivity${buildQueryString(params)}`
-  );
+  try {
+    const result = await handleApiRequest<FacilityApiResponse<StaffProductivity>>(
+      `${API_URL}/facilities/${facilityId}/staff-productivity${buildQueryString(params)}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch staff productivity: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, `getStaffProductivity(${facilityId})`);
+    throw error;
   }
-
-  const result: FacilityApiResponse<StaffProductivity> = await response.json();
-  return result.data;
 }
 
 /**
@@ -152,16 +153,16 @@ export async function getPerformanceComparison(
   facilityId: number,
   params?: DateRangeParams
 ): Promise<PerformanceComparison> {
-  const response = await fetch(
-    `${API_URL}/facilities/${facilityId}/performance-comparison${buildQueryString(params)}`
-  );
+  try {
+    const result = await handleApiRequest<FacilityApiResponse<PerformanceComparison>>(
+      `${API_URL}/facilities/${facilityId}/performance-comparison${buildQueryString(params)}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch performance comparison: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, `getPerformanceComparison(${facilityId})`);
+    throw error;
   }
-
-  const result: FacilityApiResponse<PerformanceComparison> = await response.json();
-  return result.data;
 }
 
 /**
@@ -171,14 +172,14 @@ export async function getRevenueAnalytics(
   facilityId: number,
   params?: DateRangeParams
 ): Promise<RevenueAnalytics> {
-  const response = await fetch(
-    `${API_URL}/facilities/${facilityId}/revenue${buildQueryString(params)}`
-  );
+  try {
+    const result = await handleApiRequest<FacilityApiResponse<RevenueAnalytics>>(
+      `${API_URL}/facilities/${facilityId}/revenue${buildQueryString(params)}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch revenue analytics: ${response.statusText}`);
+    return result.data;
+  } catch (error) {
+    logApiError(error as any, `getRevenueAnalytics(${facilityId})`);
+    throw error;
   }
-
-  const result: FacilityApiResponse<RevenueAnalytics> = await response.json();
-  return result.data;
 }
